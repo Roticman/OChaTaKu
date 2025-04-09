@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <!-- 时间戳 -->
+    <TextView
+        android:id="@+id/txt_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 左侧（对方） -->
+    <ImageView
+        android:id="@+id/img_avatar_left"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_timestamp" />
+
+    <TextView
+        android:id="@+id/msg_text_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_message_left"
+        android:padding="10dp"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/img_avatar_left"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/btn_audio_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🎵 播放"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/img_avatar_left"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/audio_duration_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/btn_audio_left" />
+
+    <!-- 右侧（自己） -->
+    <ImageView
+        android:id="@+id/img_avatar_right"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/msg_text_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_message_right"
+        android:padding="10dp"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/img_avatar_right" />
+
+    <TextView
+        android:id="@+id/txt_read_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@id/img_avatar_right" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
