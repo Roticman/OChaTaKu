@@ -1,57 +1,68 @@
 package com.example.ochataku.ui
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.ochataku.R
 import com.example.ochataku.data.local.user.UserEntity
-import com.example.ochataku.ui.main.validateInputs
 import com.example.ochataku.viewmodel.RegisterViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import androidx.navigation.NavController
+import com.example.ochataku.viewmodel.LoginViewModel
+import java.io.File
 import java.security.MessageDigest
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     onBack: () -> Unit,
-    viewModel: RegisterViewModel = viewModel()
+    viewModel: RegisterViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var avatarUri by remember { mutableStateOf<Uri?>(null) }
+    var inputErrors by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
 
-    val pickImageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        avatarUri = uri
-    }
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri -> avatarUri = uri }
 
     val registerSuccess by viewModel.registerSuccess.collectAsState()
 
     LaunchedEffect(registerSuccess) {
-        if (registerSuccess) {
-            Toast.makeText(context, "注册成功", Toast.LENGTH_SHORT).show()
-            onBack() // 注册成功后返回上一界面（或其他导航逻辑）
+        registerSuccess?.let {
+            if (it) {
+                Toast.makeText(context, "注册成功！", Toast.LENGTH_SHORT).show()
+                onBack()
+            } else {
+                Toast.makeText(context, "注册失败，用户名可能已存在", Toast.LENGTH_SHORT).show()
+            }
+            viewModel.resetState()
         }
     }
 
@@ -71,41 +82,51 @@ fun RegisterScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(avatarUri ?: R.drawable.ic_avatar),
-                contentDescription = "选择头像",
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .clickable { pickImageLauncher.launch("image/*") }
-            )
-            OutlinedTextField(
+            // 头像选择
+            AvatarPicker(avatarUri, pickImageLauncher)
+
+            // 用户名输入
+            InputField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("用户名") }
-            )
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("邮箱") }
-            )
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("密码") },
-                visualTransformation = PasswordVisualTransformation()
+                label = "用户名",
+                errorMessage = inputErrors["username"],
+                modifier = Modifier.fillMaxWidth()
             )
 
+            // 邮箱输入
+//            InputField(
+//                value = email,
+//                onValueChange = { email = it },
+//                label = "邮箱",
+//                errorMessage = inputErrors["email"],
+//                modifier = Modifier.fillMaxWidth()
+//            )
+
+            // 密码输入
+            InputField(
+                value = password,
+                onValueChange = { password = it },
+                label = "密码",
+                errorMessage = inputErrors["password"],
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // 注册按钮
             Button(
+
                 onClick = {
-                    if (validateInputs(username, email, password)) {
+
+                    inputErrors = validateInputsWithMessages(username, password)
+                    if (inputErrors.all { it.value == null }) {
                         viewModel.registerUser(
+                            context = context,
                             username = username,
-                            email = email,
-                            passwordHash = hashPassword(password),
+                            password = password,
                             avatarUri = avatarUri
                         )
                     }
@@ -114,24 +135,104 @@ fun RegisterScreen(
             ) {
                 Text("立即注册")
             }
+
+
         }
     }
 }
 
-//fun onRegisterSuccess(username: String, email: String, password: String,avatarUri: String): UserEntity {
-//    return UserEntity(
-//        username = username,
-//        email = email,
-//        passwordHash = hashPassword(password), // 你应该实现 hash 函数
-//        avatarUrl = avatarUri // 默认没有头像，可后续编辑添加
-//    )
-//}
+// 带错误信息的验证函数
+fun validateInputsWithMessages(
+    username: String,
+//    email: String,
+    password: String
+): Map<String, String?> {
+    val errors = mutableMapOf<String, String?>()
 
-//用 SHA-256 加密
-fun hashPassword(password: String): String {
-    val bytes = MessageDigest
-        .getInstance("SHA-256")
-        .digest(password.toByteArray())
+    when {
+        username.isBlank() -> errors["username"] = "用户名不能为空"
+        username.length < 4 -> errors["username"] = "用户名至少4个字符"
+        username.length > 20 -> errors["username"] = "用户名不能超过20个字符"
+        !username.matches(Regex("^[a-zA-Z0-9_]+$")) ->
+            errors["username"] = "只能包含字母、数字和下划线"
+    }
 
+//    when {
+//        email.isBlank() -> errors["email"] = "邮箱不能为空"
+//        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+//            errors["email"] = "请输入有效的邮箱地址"
+//    }
+
+    when {
+        password.isBlank() -> errors["password"] = "密码不能为空"
+        password.length < 8 -> errors["password"] = "密码至少8个字符"
+        !password.any { it.isDigit() } -> errors["password"] = "至少包含一个数字"
+        !password.any { it.isLetter() } -> errors["password"] = "至少包含一个字母"
+    }
+
+    return errors
+}
+
+private fun hashPassword(password: String): String {
+    // 复用之前的 SHA-256 哈希逻辑
+    val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
     return bytes.joinToString("") { "%02x".format(it) }
+}
+
+// 头像选择组件
+@Composable
+private fun AvatarPicker(
+    avatarUri: Uri?,
+    pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>
+) {
+    Box(contentAlignment = Alignment.BottomEnd) {
+        Image(
+            painter = rememberAsyncImagePainter(avatarUri ?: R.drawable.default_avatar),
+            contentDescription = "用户头像",
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .clickable { pickImageLauncher.launch("image/*") },
+            contentScale = ContentScale.Crop
+        )
+        Icon(
+            imageVector = Icons.Default.Edit,
+            contentDescription = "修改头像",
+            modifier = Modifier
+                .size(24.dp)
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                .padding(4.dp),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+}
+
+// 通用输入框组件
+@Composable
+private fun InputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    errorMessage: String?,
+    modifier: Modifier = Modifier,
+    visualTransformation: VisualTransformation = VisualTransformation.None
+) {
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            visualTransformation = visualTransformation,
+            isError = errorMessage != null,
+            modifier = Modifier.fillMaxWidth()
+        )
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
 }

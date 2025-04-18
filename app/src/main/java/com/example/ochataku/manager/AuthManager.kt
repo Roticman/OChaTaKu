@@ -2,7 +2,7 @@ package com.example.ochataku.manager
 
 import android.content.Context
 import androidx.core.content.edit
-import com.example.ochataku.model.Auth
+import com.example.ochataku.data.local.user.UserEntity
 
 class AuthManager(private val context: Context) {
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
@@ -12,42 +12,56 @@ class AuthManager(private val context: Context) {
         prefs.edit { putBoolean("is_logged_in", isLoggedIn) }
     }
 
-    fun isLoggedIn(): Boolean = prefs.getBoolean("is_logged_in", false)
+    fun isLoggedIn(): Boolean {
+        return cachedLoggedIn ?: prefs.getBoolean("is_logged_in", false).also {
+            cachedLoggedIn = it
+        }
+    }
 
-    // ✅ 保存用户信息
-    fun saveAuth(id: Long, authName: String, email: String, avatarUrl: String?, bio: String?) {
+    companion object {
+        @Volatile private var cachedLoggedIn: Boolean? = null
+    }
+
+    // ✅ 保存用户信息（根据 UserEntity）
+    fun saveUser(user: UserEntity) {
         prefs.edit {
-            putLong("auth_id", id)
-            putString("auth_name", authName)
-            putString("email", email)
-            putString("avatar_url", avatarUrl)
-            putString("bio", bio)
+            putLong("user_id", user.userId)
+            putString("username", user.username)
+            putString("nickname", user.nickname)
+            putString("email", user.email)
+            putString("avatar", user.avatar)
+            putString("phone", user.phone)
+            putInt("gender", user.gender ?: 0)
+            putString("region", user.region)
+            putString("signature", user.signature)
+            putString("birth_date", user.birthDate)
         }
     }
 
     // ✅ 获取用户信息
-    fun getAuth(): Auth {
-        val id = prefs.getLong("auth_id", -1)
-        val authName = prefs.getString("auth_name", null)
-        val email = prefs.getString("email", null)
-        val avatarUrl = prefs.getString("avatar_url", null)
-        val bio = prefs.getString("bio", null)
-
-        return if (id != -1L && authName != null && email != null) {
-            Auth(id, authName, email, avatarUrl, bio)
-        } else {
-            Auth(-1, "未知用户", "unknown@example.com", null, null) // 没有用户信息
-        }
+    fun getUser(): UserEntity {
+        return UserEntity(
+            userId = prefs.getLong("user_id", -1L),
+            username = prefs.getString("username", null),
+            password = "", // 密码不存本地
+            nickname = prefs.getString("nickname", "") ?: "",
+            avatar = prefs.getString("avatar", null),
+            phone = prefs.getString("phone", null),
+            email = prefs.getString("email", null),
+            gender = prefs.getInt("gender", 0),
+            region = prefs.getString("region", null),
+            signature = prefs.getString("signature", null),
+            birthDate = prefs.getString("birth_date", null)
+        )
     }
 
-    fun getAuthId(): Long {
-        return prefs.getLong("auth_id", -1) // 默认值 -1 表示没有存储
+    fun getUserId(): Long {
+        return prefs.getLong("user_id", -1)
     }
 
-    // ✅ 清除用户信息（登出时调用）
+    // ✅ 清除所有
     fun clearAuth() {
         prefs.edit { clear() }
+        cachedLoggedIn = false
     }
 }
-
-

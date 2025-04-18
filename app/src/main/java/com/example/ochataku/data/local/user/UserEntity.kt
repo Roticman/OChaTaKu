@@ -1,31 +1,54 @@
 package com.example.ochataku.data.local.user
 import androidx.room.*
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
+import java.util.Date
 
-@Entity(tableName = "users")
+@Entity(
+    tableName = "users",
+    indices = [
+        Index(value = ["username"], name = "idx_username"),
+        Index(value = ["phone"], name = "idx_phone"),
+        Index(value = ["email"], name = "idx_email"),
+        Index(value = ["nickname"], name = "idx_nickname")
+    ]
+)
 data class UserEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    @ColumnInfo(name = "user_id")
+    val userId: Long,
+
     @ColumnInfo(name = "username")
-    val username: String,
+    val username: String? = null,
+
+    @ColumnInfo(name = "password")
+    val password: String,
+
+    @ColumnInfo(name = "nickname")
+    val nickname: String,
+
+    @ColumnInfo(name = "avatar")
+    val avatar: String? = null,
+
+    @ColumnInfo(name = "phone")
+    val phone: String? = null,
+
     @ColumnInfo(name = "email")
-    val email: String,
-    @ColumnInfo(name = "password_hash")
-    val passwordHash: String,
-    @ColumnInfo(name = "avatar_url")
-    val avatarUrl: String?,
-    @ColumnInfo(name = "created_at", defaultValue = "CURRENT_TIMESTAMP")
-    val createdAt: Long = System.currentTimeMillis()
+    val email: String? = null,
+
+    @ColumnInfo(name = "gender")
+    val gender: Int? = null, // 0=未知，1=男，2=女
+
+    @ColumnInfo(name = "region")
+    val region: String? = null,
+
+    @ColumnInfo(name = "signature")
+    val signature: String? = null,
+
+    @ColumnInfo(name = "birth_date")
+    val birthDate: String? = null,
 )
-
-
-
-
-//INSTANCE ?: synchronized(this) {}
-//如果 INSTANCE 为空，则创建数据库实例。
-
-//Room.databaseBuilder()
-
-//UserDatabase::class.java：指定数据库的 class。
-//"user_database"：数据库文件的名称（存储在 data/data/your.package.name/databases/ 目录）。
-//.build()：构建数据库，不启用数据库迁移（如果版本变更会导致数据丢失）。

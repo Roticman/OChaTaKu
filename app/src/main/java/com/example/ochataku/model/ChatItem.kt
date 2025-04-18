@@ -5,5 +5,6 @@ data class ChatItem(
     val name: String,
     val avatarUrl: String?,
     val lastMessage: String,
-    val lastMessageTime: Long
+    val lastMessageTime: Long,
+    val type: Int // 1=私聊，2=群聊
 )

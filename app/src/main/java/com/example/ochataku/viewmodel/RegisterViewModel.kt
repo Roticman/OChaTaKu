@@ -1,44 +1,106 @@
 package com.example.ochataku.viewmodel
 
-import android.app.Application
+import android.content.Context
 import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ochataku.data.local.AppDatabase
+import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.data.local.user.UserEntity
+import com.example.ochataku.service.ApiService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.ochataku.service.ApiClient
+import com.example.ochataku.service.RegisterRequest
+import com.example.ochataku.service.RegisterResponse
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 
-class RegisterViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class RegisterViewModel @Inject constructor(
+    private val userDao: UserDao  // 由 Hilt 自动注入
+) : ViewModel() {
 
-    private val db = AppDatabase.getDatabase(application)
-    private val userDao = db.userDao()
+    private val _registerSuccess = MutableStateFlow<Boolean?>(null)
+    val registerSuccess: StateFlow<Boolean?> = _registerSuccess
 
-    private val _registerSuccess = MutableStateFlow(false)
-    val registerSuccess: StateFlow<Boolean> = _registerSuccess
+    private val apiService = ApiClient.apiService
+
 
     fun registerUser(
+        context: Context,
         username: String,
-        email: String,
-        passwordHash: String,
+        password: String,
         avatarUri: Uri?
     ) {
-        val user = UserEntity(
-            username = username,
-            email = email,
-            passwordHash = passwordHash,
-            avatarUrl = avatarUri?.toString()
-        )
+        val usernameBody = username.toRequestBody("text/plain".toMediaType())
+        val passwordBody = password.toRequestBody("text/plain".toMediaType())
 
-        viewModelScope.launch(Dispatchers.IO) {
-            userDao.insertUser(user)
-            _registerSuccess.value = true
+        val avatarPart: MultipartBody.Part? = avatarUri?.let { uri ->
+            val file = uriToFile(context, uri)
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("avatar", file.name, requestFile)
         }
+
+        // 向后端发送注册请求
+        apiService.registerUserWithAvatar(
+            username = usernameBody,
+            password = passwordBody,
+            avatar = avatarPart,
+        ).enqueue(object : Callback<RegisterResponse> {
+            override fun onResponse(
+                call: Call<RegisterResponse>,
+                response: Response<RegisterResponse>
+            ) {
+                if (response.isSuccessful) {
+                    // 后端注册成功后，保存用户到本地数据库
+                    viewModelScope.launch(Dispatchers.IO) {
+//                        userDao.insertUser(user)
+                        _registerSuccess.value = true
+                        delay(2000)  // 延时2秒后重置状态
+                        resetState()
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("Register", "注册失败: $errorBody")
+                    _registerSuccess.value = false
+                }
+            }
+
+            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
+                _registerSuccess.value = false
+            }
+        })
     }
 
+    private fun uriToFile(context: Context, uri: Uri): File {
+        val inputStream = context.contentResolver.openInputStream(uri)!!
+        val tempFile = File.createTempFile("avatar", ".jpg", context.cacheDir)
+        tempFile.outputStream().use { output ->
+            inputStream.copyTo(output)
+        }
+        return tempFile
+    }
+
+
     fun resetState() {
-        _registerSuccess.value = false
+        _registerSuccess.value = null
     }
 }

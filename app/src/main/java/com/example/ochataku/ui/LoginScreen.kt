@@ -1,6 +1,8 @@
 package com.example.ochataku.ui
 
-import android.util.Log
+import android.widget.Toast
+import com.example.ochataku.viewmodel.LoginViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -11,20 +13,44 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import kotlinx.coroutines.delay
+import com.example.ochataku.viewmodel.LoginState
 import kotlinx.coroutines.launch
-
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ochataku.viewmodel.MainViewModel
 @Composable
-fun LoginScreen(navController: NavController){
+fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltViewModel(), mainViewModel: MainViewModel) {
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val focusRequester = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
+
+    val loginState by viewModel.loginState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is LoginState.Success -> {
+                isLoading = false
+                Toast.makeText(context, "登录成功", Toast.LENGTH_SHORT).show()
+                mainViewModel.refreshLoginStatus()
+                navController.navigate("conversation"){
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+            is LoginState.Error -> {
+                isLoading = false
+                errorMessage = (loginState as LoginState.Error).message
+            }
+            else -> {}
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -57,38 +83,20 @@ fun LoginScreen(navController: NavController){
                 scope.launch {
                     isLoading = true
                     errorMessage = null
-                    // 模拟网络请求
-                    delay(500)
-
-                    // 简单验证
-                    if (username == "admin" && password == "123456") {
-                        onLoginSuccess()
-                    } else {
-                        errorMessage = "用户名或密码错误"
-                    }
-                    isLoading = false
+                    viewModel.login(username, password)
                 }
             }
         )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         TextButton(
-            onClick = { onNavigateToRegister(navController) },
+            onClick = { navController.navigate("register") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("没有账号？立即注册")
         }
     }
-}
-
-fun onLoginSuccess() {
-    TODO("Not yet implemented")
-}
-
-fun onNavigateToRegister(navController: NavController) {
-    Log.d("------", "------")
-    navController.navigate("register")
-    Log.d("******", "******")
 }
 
 @Composable

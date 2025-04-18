@@ -1,48 +1,52 @@
 package com.example.ochataku.viewmodel
 
 // MainViewModel.kt
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.model.Auth
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(private val authManager: AuthManager) : ViewModel() {
+
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+) : ViewModel() {
+    private val authManager = AuthManager(context)
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
-    val uiState: StateFlow<UiState> = _uiState
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
 
     init {
-        checkLoginState()
+        refreshLoginStatus()
     }
 
-    private fun checkLoginState() {
-
-        viewModelScope.launch {
-            delay(500)
-            val isLoggedIn = authManager.isLoggedIn()
-            _uiState.value = if (isLoggedIn) {
-                UiState.LoggedIn
-            } else {
-                UiState.LoggedOut
-            }
-        }
+    fun refreshLoginStatus() {
+        val logged = authManager.isLoggedIn()
+        Log.d("Auth", "isLoggedIn: $logged")
+        _uiState.value = if (logged) UiState.LoggedIn else UiState.LoggedOut
+        Log.d("refreshLoginStatus","!!!!!!!!!!!!!!!!!!!")
     }
+
 
     fun handleLoginSuccess() {
+//        authManager.saveAuth(auth.id, auth.username, auth.email, auth.avatarUrl, auth.bio)
         authManager.saveLoginState(true)
         _uiState.value = UiState.LoggedIn
     }
 
     fun handleLogout() {
-        authManager.saveLoginState(false)
+        authManager.clearAuth()
         _uiState.value = UiState.LoggedOut
-    }
-
-    fun getAuth(): Auth {
-        return authManager.getAuth()
     }
 
     sealed class UiState {

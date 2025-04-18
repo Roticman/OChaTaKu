@@ -8,3 +8,4 @@ data class Auth(
     val avatarUrl: String?,
     val bio: String?,
 )
+
