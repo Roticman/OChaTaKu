@@ -1,5 +1,6 @@
 package com.example.ochataku.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -89,6 +90,7 @@ fun ConversationScreen(
                         .clickable {
                             // ✅ 使用 conversation.id 作为 convId
                             onConversationClick(convo.convId, convo.name, convo.isGroup)
+                            Log.d("convIIIIIIIIIIIIIID", convo.convId.toString())
                         }
                 )
 

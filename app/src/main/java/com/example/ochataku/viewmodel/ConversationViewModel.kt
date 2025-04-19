@@ -59,6 +59,7 @@ class ConversationViewModel @Inject constructor(
                                 lastMessage = base.lastMessage,
                                 timestamp = base.timestamp
                             )
+
                         }
                         _conversations.value = enriched
                     }

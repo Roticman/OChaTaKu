@@ -95,7 +95,7 @@ data class ConversationRequest(
 
 // ✅ 响应体：获取会话列表
 data class ConversationResponse(
-    val convId: Long,
+    @SerializedName("conv_id") val convId: Long,
     @SerializedName("user_id") val userId: Long,
     @SerializedName("peer_id") val peerId: Long,
     @SerializedName("is_group") val isGroupRaw: Int,

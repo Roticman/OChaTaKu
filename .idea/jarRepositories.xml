@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteRepositoriesConfiguration">
+    <remote-repository>
+      <option name="id" value="95b331ca-3d0b-4dc6-bacc-575fb88a5058" />
+      <option name="name" value="95b331ca-3d0b-4dc6-bacc-575fb88a5058" />
+      <option name="url" value="https://maven.aliyun.com/repository/central" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="79248380-9f5d-49c7-b734-ddbf51891a99" />
+      <option name="name" value="79248380-9f5d-49c7-b734-ddbf51891a99" />
+      <option name="url" value="https://mirrors.cloud.tencent.com/nexus/repository/maven-public" />
+    </remote-repository>
+  </component>
+</project>
