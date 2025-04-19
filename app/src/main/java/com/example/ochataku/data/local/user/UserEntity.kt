@@ -13,8 +13,7 @@ import java.util.Date
     indices = [
         Index(value = ["username"], name = "idx_username"),
         Index(value = ["phone"], name = "idx_phone"),
-        Index(value = ["email"], name = "idx_email"),
-        Index(value = ["nickname"], name = "idx_nickname")
+        Index(value = ["email"], name = "idx_email")
     ]
 )
 data class UserEntity(
@@ -27,9 +26,6 @@ data class UserEntity(
 
     @ColumnInfo(name = "password")
     val password: String,
-
-    @ColumnInfo(name = "nickname")
-    val nickname: String,
 
     @ColumnInfo(name = "avatar")
     val avatar: String? = null,

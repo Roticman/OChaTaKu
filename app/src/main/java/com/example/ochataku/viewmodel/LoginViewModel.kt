@@ -11,7 +11,6 @@ import com.example.ochataku.service.ApiClient
 import com.example.ochataku.service.ApiService
 import com.example.ochataku.service.LoginRequest
 import com.example.ochataku.service.LoginResponse
-import com.example.ochataku.service.LoginUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

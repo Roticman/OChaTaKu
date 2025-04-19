@@ -1,18 +1,20 @@
 package com.example.ochataku.data.local
 
 import androidx.room.*;
-
+import com.example.ochataku.data.local.conversation.*
+import com.example.ochataku.data.local.group.*
+import com.example.ochataku.data.local.message.*
 import com.example.ochataku.data.local.user.*
 
 @Database(
-    entities = [UserEntity::class, Conversation::class],
+    entities = [UserEntity::class, ConversationEntity::class, MessageEntity::class, GroupEntity::class],
     version = 1,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
-//    abstract fun MessageDao(): MessageDao
-//    abstract fun groupDao(): GroupDao
+    abstract fun MessageDao(): MessageDao
+    abstract fun groupDao(): GroupDao
 //    abstract fun groupMemberDao(): GroupMemberDao
 //    abstract fun friendDao(): FriendDao
 //    abstract fun friendNoteDao(): FriendNoteDao

@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ochataku.manager.AuthManager
-import com.example.ochataku.model.Auth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -32,7 +31,6 @@ class MainViewModel @Inject constructor(
 
     fun refreshLoginStatus() {
         val logged = authManager.isLoggedIn()
-        Log.d("Auth", "isLoggedIn: $logged")
         _uiState.value = if (logged) UiState.LoggedIn else UiState.LoggedOut
         Log.d("refreshLoginStatus","!!!!!!!!!!!!!!!!!!!")
     }

@@ -12,9 +12,12 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.ui.theme.ChatAppTheme
 import com.example.ochataku.viewmodel.*
@@ -94,25 +97,40 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("conversation") {
+                            // 1. 先拿到当前用户 ID
+                            val currentUserId = authManager.getUserId()
+
+                            // 2. 渲染会话列表，并传入 onConversationClick 回调
                             ConversationScreen(
-                                userId = authManager.getUserId(),
-                                onConversationClick = { peerId, isGroup ->
-                                    val route =
-                                        if (isGroup) "groupChat/$peerId" else "privateChat/$peerId"
-                                    navController.navigate(route)
+                                userId = currentUserId,
+                                onConversationClick = { convId, peerName, isGroup ->
+                                    // 3. 直接用一个路由区分私聊/群聊
+                                    navController.navigate("chat/$convId/$peerName/$isGroup")
                                 }
                             )
                         }
 
-//                        composable("privateChat/{peerId}") { backStackEntry ->
-//                            val peerId = backStackEntry.arguments?.getString("peerId")?.toLongOrNull() ?: return@composable
-//                            ChatScreen(peerId = peerId, isGroup = false)
-//                        }
-//
-//                        composable("groupChat/{peerId}") { backStackEntry ->
-//                            val peerId = backStackEntry.arguments?.getString("peerId")?.toLongOrNull() ?: return@composable
-//                            ChatScreen(peerId = peerId, isGroup = true)
-//                        }
+
+                        composable(
+                            route = "chat/{convId}/{peerName}/{isGroup}",
+                            arguments = listOf(
+                                navArgument("convId") { type = NavType.LongType },
+                                navArgument("isGroup") { type = NavType.BoolType }
+                            )
+                        ) { backStackEntry ->
+                            val convId = backStackEntry.arguments!!.getLong("convId")
+                            val peerName = backStackEntry.arguments!!.getString("peerName")!!
+                            val isGroup = backStackEntry.arguments!!.getBoolean("isGroup")
+                            val currentUserId = AuthManager(LocalContext.current).getUserId()
+
+                            ChatScreen(
+                                navController = navController,
+                                convId = convId,
+                                peerName = peerName,
+                                isGroup = isGroup,
+                                currentUserId = currentUserId
+                            )
+                        }
 
 //                        composable("contacts") {
 //                            // TODO: 联系人界面
@@ -149,21 +167,25 @@ private fun BottomNavigationBar(navController: NavHostController) {
             icon = { Icon(Icons.Default.Person, "Contacts") },
             label = { Text("通讯录") },
             selected = currentRoute == "contacts",
-            onClick = { if (currentRoute != "contacts") {
-                navController.navigate("contacts") {
-                    launchSingleTop = true
+            onClick = {
+                if (currentRoute != "contacts") {
+                    navController.navigate("contacts") {
+                        launchSingleTop = true
+                    }
                 }
-            } }
+            }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Settings, "Profile") },
             label = { Text("个人") },
             selected = currentRoute == "profile",
-            onClick = { if (currentRoute != "profile") {
-                navController.navigate("profile") {
-                    launchSingleTop = true
+            onClick = {
+                if (currentRoute != "profile") {
+                    navController.navigate("profile") {
+                        launchSingleTop = true
+                    }
                 }
-            } }
+            }
         )
     }
 }

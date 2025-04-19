@@ -1,10 +1,12 @@
 package com.example.ochataku.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 
 import androidx.compose.runtime.Composable
@@ -12,13 +14,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.ochataku.R
+import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.viewmodel.ConversationViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -28,7 +34,7 @@ import java.util.Locale
 @Composable
 fun ConversationScreen(
     userId: Long,
-    onConversationClick: (peerId: Long, isGroup: Boolean) -> Unit
+    onConversationClick: (convId: Long, peerName: String, isGroup: Boolean) -> Unit
 ) {
     val viewModel: ConversationViewModel = hiltViewModel()
     val conversations by viewModel.conversations.collectAsState()
@@ -40,30 +46,32 @@ fun ConversationScreen(
     Scaffold(topBar = {
         TopAppBar(title = { Text("会话") })
     }) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
             items(conversations) { convo ->
+                val imageUrl = "${BASE_URL}${convo.avatar}"
+
                 ListItem(
                     leadingContent = {
-                        if (convo.avatar?.isNotBlank() == true) {
-                            AsyncImage(
-                                model = convo.avatar,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp)
-                            )
-                        } else {
-                            Image(
-                                painter = painterResource(id = R.drawable.default_avatar),
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp)
-                            )
-                        }
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(imageUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Avatar",
+                            placeholder = painterResource(R.drawable.default_avatar),
+                            error = painterResource(R.drawable.ic_avatar_error),
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
                     },
                     headlineContent = {
-                        (if (convo.isGroup) "[群] ${convo.peerName}" else convo.peerName)?.let {
-                            Text(
-                                it
-                            )
-                        }
+                        val name = if (convo.isGroup) "[群] ${convo.name}" else convo.name
+                        Text(name)
                     },
                     supportingContent = {
                         Text(convo.lastMessage)
@@ -79,7 +87,8 @@ fun ConversationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            onConversationClick(convo.peerId, convo.isGroup)
+                            // ✅ 使用 conversation.id 作为 convId
+                            onConversationClick(convo.convId, convo.name, convo.isGroup)
                         }
                 )
 
@@ -88,6 +97,7 @@ fun ConversationScreen(
         }
     }
 }
+
 
 fun formatSmartTime(timestamp: Long): String {
     val now = Calendar.getInstance()

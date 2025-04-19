@@ -5,32 +5,32 @@ import androidx.core.content.edit
 import com.example.ochataku.data.local.user.UserEntity
 
 class AuthManager(private val context: Context) {
+    companion object {
+        private const val NAME = "auth_prefs"
+        private const val KEY_IS_LOGGED_IN = "is_logged_in"
+    }
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
-    // ✅ 保存用户登录状态
+    // 同步写，保证立刻落盘
     fun saveLoginState(isLoggedIn: Boolean) {
-        prefs.edit { putBoolean("is_logged_in", isLoggedIn) }
-    }
-
-    fun isLoggedIn(): Boolean {
-        return cachedLoggedIn ?: prefs.getBoolean("is_logged_in", false).also {
-            cachedLoggedIn = it
+        prefs.edit(commit = true) {
+            putBoolean(KEY_IS_LOGGED_IN, isLoggedIn)
         }
     }
 
-    companion object {
-        @Volatile private var cachedLoggedIn: Boolean? = null
+    // 直接从磁盘读
+    fun isLoggedIn(): Boolean {
+        return prefs.getBoolean(KEY_IS_LOGGED_IN, false)
     }
 
     // ✅ 保存用户信息（根据 UserEntity）
     fun saveUser(user: UserEntity) {
-        prefs.edit {
+        prefs.edit(commit = true) {
             putLong("user_id", user.userId)
             putString("username", user.username)
-            putString("nickname", user.nickname)
-            putString("email", user.email)
             putString("avatar", user.avatar)
             putString("phone", user.phone)
+            putString("email", user.email)
             putInt("gender", user.gender ?: 0)
             putString("region", user.region)
             putString("signature", user.signature)
@@ -44,7 +44,6 @@ class AuthManager(private val context: Context) {
             userId = prefs.getLong("user_id", -1L),
             username = prefs.getString("username", null),
             password = "", // 密码不存本地
-            nickname = prefs.getString("nickname", "") ?: "",
             avatar = prefs.getString("avatar", null),
             phone = prefs.getString("phone", null),
             email = prefs.getString("email", null),
@@ -61,7 +60,8 @@ class AuthManager(private val context: Context) {
 
     // ✅ 清除所有
     fun clearAuth() {
-        prefs.edit { clear() }
-        cachedLoggedIn = false
+        prefs.edit(commit = true) {
+            clear()
+        }
     }
 }

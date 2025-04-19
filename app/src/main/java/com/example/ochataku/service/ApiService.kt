@@ -1,6 +1,5 @@
 package com.example.ochataku.service
 
-import android.net.Uri
 import com.example.ochataku.data.local.user.UserEntity
 import com.example.ochataku.service.ApiClient.apiService
 import com.google.gson.annotations.SerializedName
@@ -9,12 +8,7 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ApiService {
 
@@ -29,12 +23,17 @@ interface ApiService {
     @POST("/api/user/login")
     fun loginUser(@Body request: LoginRequest): Call<LoginResponse>
 
-
     @POST("/api/conversation/add")
     suspend fun addConversation(@Body request: ConversationRequest): Response<Unit>
 
     @GET("/api/conversation/list/{userId}")
     fun getConversationsAsync(@Path("userId") userId: Long): Call<List<ConversationResponse>>
+
+    @GET("/api/user/simple/{id}")
+    suspend fun getUserById(@Path("id") userId: Long): Response<DataSimple>
+
+    @GET("/api/group/simple/{id}")
+    suspend fun getGroupById(@Path("id") groupId: Long): Response<DataSimple>
 
 
     // 上传媒体文件（图片、音频、视频）
@@ -44,30 +43,97 @@ interface ApiService {
         @Part file: MultipartBody.Part
     ): Call<UploadResponse>
 
-    // 发送消息（支持带 media_url 的 JSON 格式）
+    // ✅ 使用类型安全的发送消息请求体
     @POST("/api/message/send")
     fun sendMessage(
-        @Body requestBody: RequestBody
+        @Body request: SendMessageRequest
     ): Call<ResponseBody>
 
-    // 拉取私聊消息
-    @GET("/api/message/private/{user1}/{user2}")
-    fun getPrivateMessages(
-        @Path("user1") user1: Long,
-        @Path("user2") user2: Long
-    ): Call<List<MessageResponse>>
-
-    // 拉取群聊消息
-    @GET("/api/message/group/{groupId}")
-    fun getGroupMessages(
-        @Path("groupId") groupId: Long
+    // ✅ 使用 conv_id 拉取私聊/群聊消息（统一结构）
+    @GET("/api/message/conversation/{convId}")
+    fun getMessagesForConversation(
+        @Path("convId") convId: Long
     ): Call<List<MessageResponse>>
 }
 
+data class DataSimple(
+    val name: String,
+    val avatar: String
+)
+
+// ✅ 请求体：注册
+data class RegisterRequest(
+    val username: String,
+    val password: String,
+    val avatarUri: String
+)
+
+data class RegisterResponse(
+    val message: String
+)
+
+// ✅ 请求体：登录
+data class LoginRequest(
+    val username: String,
+    val password: String
+)
+
+data class LoginResponse(
+    val message: String,
+    val user: UserEntity
+)
+
+// ✅ 请求体：创建或更新会话
+data class ConversationRequest(
+    val userId: Long,
+    val peerId: Long,
+    val peerName: String,
+    val isGroup: Boolean,
+    val lastMessage: String,
+    val timestamp: Long
+)
+
+// ✅ 响应体：获取会话列表
+data class ConversationResponse(
+    val convId: Long,
+    @SerializedName("user_id") val userId: Long,
+    @SerializedName("peer_id") val peerId: Long,
+    @SerializedName("is_group") val isGroupRaw: Int,
+    @SerializedName("last_message") val lastMessage: String?,
+    val timestamp: Long
+) {
+    val isGroup: Boolean get() = isGroupRaw == 1
+}
+
+// ✅ 请求体：发送消息（已适配 conv_id）
+data class SendMessageRequest(
+    val sender_id: Long,
+    val conv_id: Long,
+    val is_group: Boolean,
+    val content: String,
+    val timestamp: Long,
+    val message_type: String = "text",
+    val media_url: String? = null
+)
+
+// ✅ 响应体：消息内容
+data class MessageResponse(
+    val id: Long,
+    val sender_id: Long,
+    val conv_id: Long,
+    val is_group: Int,
+    val content: String,
+    val timestamp: Long,
+    val message_type: String = "text",
+    val media_url: String? = null
+)
+
+// ✅ 上传响应
 data class UploadResponse(
     val url: String
 )
 
+// ✅ 会话刷新工具函数
 suspend fun refreshConversationAfterMessage(
     userId: Long,
     peerId: Long,
@@ -91,76 +157,3 @@ suspend fun refreshConversationAfterMessage(
         false
     }
 }
-data class RegisterRequest(
-    val username: String,
-    val password: String,
-    val avatarUri: String
-)
-
-data class RegisterResponse(
-    val message: String
-)
-
-data class LoginRequest(
-    val username: String,
-    val password: String
-)
-
-data class LoginResponse(
-    val message: String,
-    val user: UserEntity
-)
-
-data class LoginUser(
-    val id: Long,
-    val username: String,
-    val avatar: String?
-)
-
-// 请求体模型（发送会话）
-data class ConversationRequest(
-    val userId: Long,
-    val peerId: Long,
-    val peerName: String,
-    val isGroup: Boolean,
-    val lastMessage: String,
-    val timestamp: Long
-)
-
-// 响应模型（列表）
-data class ConversationResponse(
-    val id: Long,
-    @SerializedName("user_id") val userId: Long,
-    @SerializedName("peer_id") val peerId: Long,
-    @SerializedName("peer_name") val peerName: String?,
-    @SerializedName("avatar") val avatar: String?,
-    @SerializedName("is_group") val isGroupRaw: Int,
-    @SerializedName("last_message") val lastMessage: String?,
-    val timestamp: Long
-) {
-    val isGroup: Boolean get() = isGroupRaw == 1
-}
-
-// ✅ MessageResponse.kt（前端接收模型）
-data class MessageResponse(
-    val sender_id: Long,
-    val sender_name: String?,
-    val receiver_id: Long,
-    val is_group: Boolean,
-    val content: String,
-    val timestamp: Long,
-    val message_type: String = "text",
-    val media_url: String? = null
-)
-
-//data class SendMessageRequest(
-//    val sender_id: Long,
-//    val sender_name: String?,
-//    val receiver_id: Long,
-//    val is_group: Boolean,
-//    val content: String,
-//    val timestamp: Long,
-//    val message_type: String = "text",
-//    val media_url: String? = null
-//)
-

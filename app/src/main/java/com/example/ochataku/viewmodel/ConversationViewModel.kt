@@ -3,7 +3,7 @@ package com.example.ochataku.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ochataku.data.local.*
+import com.example.ochataku.data.local.conversation.*
 import com.example.ochataku.service.ApiClient
 import com.example.ochataku.service.ConversationResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,13 +17,13 @@ class ConversationViewModel @Inject constructor(
     private val conversationDao: ConversationDao
 ) : ViewModel() {
 
-    private val _conversations = MutableStateFlow<List<Conversation>>(emptyList())
-    val conversations: StateFlow<List<Conversation>> = _conversations
+    private val _conversations = MutableStateFlow<List<ConversationDisplay>>(emptyList())
+    val conversations: StateFlow<List<ConversationDisplay>> = _conversations
 
     fun loadConversations(userId: Long) {
         Log.d("UserId", userId.toString())
 
-        val call = ApiClient.apiService.getConversationsAsync(userId) // 👈 用 Call 类型接口
+        val call = ApiClient.apiService.getConversationsAsync(userId)
 
         call.enqueue(object : retrofit2.Callback<List<ConversationResponse>> {
             override fun onResponse(
@@ -32,34 +32,43 @@ class ConversationViewModel @Inject constructor(
             ) {
                 if (response.isSuccessful && response.body() != null) {
                     val remoteList = response.body()!!.map {
-                        Conversation(
-                            id = it.id,
+                        ConversationEntity(
+                            convId = it.convId,
                             userId = it.userId,
                             peerId = it.peerId,
-                            peerName = it.peerName,
-                            avatar = it.avatar,
                             isGroup = it.isGroup,
                             lastMessage = it.lastMessage ?: "",
                             timestamp = it.timestamp
                         )
                     }
 
-                    // 打印调试
-                    remoteList.forEach {
-                        Log.d("Conversation", it.toString())
+                    viewModelScope.launch {
+                        val enriched = remoteList.map { base ->
+                            val nameAndAvatar = if (base.isGroup) {
+                                fetchGroupInfo(base.peerId)  // 查询群组表
+                            } else {
+                                fetchUserInfo(base.peerId)   // 查询用户表
+                            }
+
+                            ConversationDisplay(
+                                convId = base.convId,
+                                peerId = base.peerId,
+                                isGroup = base.isGroup,
+                                name = nameAndAvatar.first,
+                                avatar = nameAndAvatar.second,
+                                lastMessage = base.lastMessage,
+                                timestamp = base.timestamp
+                            )
+                        }
+                        _conversations.value = enriched
                     }
 
-                    // 保存并更新 UI
-                    viewModelScope.launch {
-                        conversationDao.clearConversationsForUser(userId)
-                        conversationDao.insertAll(remoteList)
-                        _conversations.value = remoteList
-                    }
                 } else {
-                    Log.e("loadConversations", "请求失败: ${response.code()} - ${response.errorBody()?.string()}")
-                    viewModelScope.launch {
-                        _conversations.value = conversationDao.getConversationsForUser(userId)
-                    }
+                    Log.e(
+                        "loadConversations",
+                        "请求失败: ${response.code()} - ${response.errorBody()?.string()}"
+                    )
+                    loadLocalFallback(userId)
                 }
             }
 
@@ -68,13 +77,45 @@ class ConversationViewModel @Inject constructor(
                 t: Throwable
             ) {
                 Log.e("loadConversations", "网络错误：${t.message}")
-                viewModelScope.launch {
-                    _conversations.value = conversationDao.getConversationsForUser(userId)
-                }
+                loadLocalFallback(userId)
             }
         })
     }
 
+    private suspend fun fetchUserInfo(userId: Long): Pair<String, String?> {
+        return try {
+            val response = ApiClient.apiService.getUserById(userId)
+            if (response.isSuccessful) {
+                val user = response.body()
+                Pair(user?.name ?: "用户", user?.avatar)
+            } else {
+                Pair("未知用户", null)
+            }
+        } catch (e: Exception) {
+            Pair("未知用户", null)
+        }
+    }
 
+    private suspend fun fetchGroupInfo(groupId: Long): Pair<String, String?> {
+        return try {
+            val response = ApiClient.apiService.getGroupById(groupId)
+            if (response.isSuccessful) {
+                val group = response.body()
+                Pair(group?.name ?: "群聊", group?.avatar)
+            } else {
+                Pair("群聊", null)
+            }
+        } catch (e: Exception) {
+            Pair("群聊", null)
+        }
+    }
 
+    private fun loadLocalFallback(userId: Long) {
+        viewModelScope.launch {
+            _conversations.value = conversationDao.getDisplayConversations(userId)
+        }
+    }
 }
+
+
+

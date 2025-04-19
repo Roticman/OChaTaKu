@@ -3,7 +3,7 @@ package com.example.ochataku
 import android.content.Context
 import androidx.room.Room
 import com.example.ochataku.data.local.AppDatabase
-import com.example.ochataku.data.local.ConversationDao
+import com.example.ochataku.data.local.conversation.ConversationDao
 import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.repository.UserRepository

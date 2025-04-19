@@ -19,14 +19,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.ochataku.viewmodel.ChatViewModel
 import kotlinx.coroutines.launch
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     navController: NavController,
-    peerId: Long,
+    convId: Long,
+    peerName: String,
     isGroup: Boolean,
-    currentUserId: Long
+    currentUserId: Long,
+//    peerAvatarUrl: String?,     // 可用在后续头像展示
+//    currentUserAvatarUrl: String?
 ) {
     val viewModel: ChatViewModel = hiltViewModel()
     val context = LocalContext.current
@@ -34,17 +36,18 @@ fun ChatScreen(
     val coroutineScope = rememberCoroutineScope()
     var messageText by remember { mutableStateOf(TextFieldValue()) }
 
-    LaunchedEffect(peerId, isGroup) {
-        viewModel.loadMessages(currentUserId, peerId, isGroup)
+    // ✅ 加载消息改为按 convId
+    LaunchedEffect(convId) {
+        viewModel.loadMessagesByConvId(convId)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isGroup) "群聊 $peerId" else "私聊 $peerId") },
+                title = { Text(if (isGroup) "群聊 $peerName" else "私聊 $peerName") },
                 actions = {
                     IconButton(onClick = {
-                        val route = if (isGroup) "groupDetail/$peerId" else "chatDetail/$peerId"
+                        val route = if (isGroup) "groupDetail/$convId" else "chatDetail/$convId"
                         navController.navigate(route)
                     }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "更多")
@@ -74,12 +77,11 @@ fun ChatScreen(
                             messageType = "text",
                             content = messageText.text,
                             senderId = currentUserId,
-                            senderName = "我",
-                            receiverId = peerId,
+                            convId = convId,
                             isGroup = isGroup
                         ) { success ->
                             if (success) {
-                                viewModel.loadMessages(currentUserId, peerId, isGroup)
+                                viewModel.loadMessagesByConvId(convId)
                                 messageText = TextFieldValue()
                             }
                         }
@@ -103,7 +105,7 @@ fun ChatScreen(
                 ) {
                     if (isGroup && msg.senderId != currentUserId) {
                         Text(
-                            text = msg.senderName ?: "成员",
+                            text = msg.name ?: "成员",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(bottom = 2.dp, start = 4.dp)
