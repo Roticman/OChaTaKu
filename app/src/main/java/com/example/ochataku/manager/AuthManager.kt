@@ -9,6 +9,7 @@ class AuthManager(private val context: Context) {
         private const val NAME = "auth_prefs"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
     }
+
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
     // 同步写，保证立刻落盘
@@ -52,6 +53,10 @@ class AuthManager(private val context: Context) {
             signature = prefs.getString("signature", null),
             birthDate = prefs.getString("birth_date", null)
         )
+    }
+
+    fun getUserAvatar(): String? {
+        return prefs.getString("avatar", "null")
     }
 
     fun getUserId(): Long {

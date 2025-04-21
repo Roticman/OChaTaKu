@@ -3,6 +3,7 @@ package com.example.ochataku.data.local.message
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "message")
@@ -14,18 +15,9 @@ data class MessageEntity(
     val content: String,
     val timestamp: Long,
     @ColumnInfo(name = "message_type") val messageType: String,
-    @ColumnInfo(name = "media_url") val mediaUrl: String?
-)
+    @ColumnInfo(name = "media_url") val mediaUrl: String?,
+) {
+    @Ignore
+    var mediaFileSize: Long? = null
+}
 
-data class MessageDisplay(
-    val id: Long = 0,
-    val senderId: Long,
-    val name: String,
-    val avatar: String?,
-    val convId: Long,
-    val isGroup: Boolean,
-    val content: String,
-    val timestamp: Long,
-    val messageType: String,
-    val mediaUrl: String?
-)

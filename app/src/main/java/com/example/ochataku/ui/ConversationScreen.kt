@@ -35,7 +35,7 @@ import java.util.Locale
 @Composable
 fun ConversationScreen(
     userId: Long,
-    onConversationClick: (convId: Long, peerName: String, isGroup: Boolean) -> Unit
+    onConversationClick: (convId: Long, peerId: Long?, peerName: String, isGroup: Boolean, peerAvatar: String) -> Unit
 ) {
     val viewModel: ConversationViewModel = hiltViewModel()
     val conversations by viewModel.conversations.collectAsState()
@@ -89,8 +89,23 @@ fun ConversationScreen(
                         .fillMaxWidth()
                         .clickable {
                             // ✅ 使用 conversation.id 作为 convId
-                            onConversationClick(convo.convId, convo.name, convo.isGroup)
-                            Log.d("convIIIIIIIIIIIIIID", convo.convId.toString())
+                            val peerId = if (convo.isGroup) {
+                                convo.groupId
+                            } else {
+                                if (convo.aId != userId) {
+                                    convo.aId
+                                } else {
+                                    convo.bId
+                                }
+                            }
+                            onConversationClick(
+                                convo.convId,
+                                peerId,
+                                convo.name,
+                                convo.isGroup,
+                                convo.avatar
+                            )
+//                            Log.d("convIIIIIIIIIIIIIID", convo.convId.toString())
                         }
                 )
 
@@ -110,10 +125,12 @@ fun formatSmartTime(timestamp: Long): String {
                 now.get(Calendar.DAY_OF_YEAR) == msgTime.get(Calendar.DAY_OF_YEAR) -> {
             SimpleDateFormat("HH:mm", Locale.getDefault()).format(msgTime.time)
         }
+
         now.get(Calendar.YEAR) == msgTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) - msgTime.get(Calendar.DAY_OF_YEAR) == 1 -> {
             "昨天 " + SimpleDateFormat("HH:mm", Locale.getDefault()).format(msgTime.time)
         }
+
         else -> {
             SimpleDateFormat("EEEE", Locale.getDefault()).format(msgTime.time) // 星期几
         }

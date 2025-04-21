@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.room.Room
 import com.example.ochataku.data.local.AppDatabase
 import com.example.ochataku.data.local.conversation.ConversationDao
+import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.repository.UserRepository
+import com.example.ochataku.service.ApiClient
+import com.example.ochataku.service.ApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,6 +30,10 @@ object AppModule {
             "app_database"
         ).build()
     }
+
+    @Provides
+    @Singleton
+    fun provideApiService(): ApiService = ApiClient.apiService
 
     @Provides
     fun provideUserRepository(): UserRepository {
@@ -56,10 +63,10 @@ object AppModule {
 //        return db.groupMemberDao()
 //    }
 //
-//    @Provides
-//    fun provideMessageDao(db: AppDatabase): MessageDao {
-//        return db.MessageDao()
-//    }
+    @Provides
+    fun provideMessageDao(db: AppDatabase): MessageDao {
+        return db.MessageDao()
+    }
 //
 //    @Provides
 //    fun provideFriendDao(db: AppDatabase): FriendDao {

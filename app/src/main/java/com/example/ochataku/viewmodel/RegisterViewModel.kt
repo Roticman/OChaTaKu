@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.ochataku.service.ApiClient
 import com.example.ochataku.service.RegisterRequest
 import com.example.ochataku.service.RegisterResponse
+import com.example.ochataku.service.UploadResponse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -50,44 +51,93 @@ class RegisterViewModel @Inject constructor(
         password: String,
         avatarUri: Uri?
     ) {
-        val usernameBody = username.toRequestBody("text/plain".toMediaType())
-        val passwordBody = password.toRequestBody("text/plain".toMediaType())
-
-        val avatarPart: MultipartBody.Part? = avatarUri?.let { uri ->
-            val file = uriToFile(context, uri)
+        // 先上传 avatar，如果存在
+        if (avatarUri != null) {
+            val file = uriToFile(context, avatarUri)
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            MultipartBody.Part.createFormData("avatar", file.name, requestFile)
-        }
+            val avatarPart = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-        // 向后端发送注册请求
-        apiService.registerUserWithAvatar(
-            username = usernameBody,
-            password = passwordBody,
-            avatar = avatarPart,
-        ).enqueue(object : Callback<RegisterResponse> {
-            override fun onResponse(
-                call: Call<RegisterResponse>,
-                response: Response<RegisterResponse>
-            ) {
-                if (response.isSuccessful) {
-                    // 后端注册成功后，保存用户到本地数据库
-                    viewModelScope.launch(Dispatchers.IO) {
-//                        userDao.insertUser(user)
-                        _registerSuccess.value = true
-                        delay(2000)  // 延时2秒后重置状态
-                        resetState()
+            apiService.uploadAvatar(avatarPart)
+                .enqueue(object : Callback<UploadResponse> {
+                    override fun onResponse(
+                        call: Call<UploadResponse>,
+                        response: Response<UploadResponse>
+                    ) {
+                        if (response.isSuccessful && response.body() != null) {
+                            // 上传成功，拿到 URL 后再注册
+                            sendRegister(username, password, response.body()!!.url)
+                        } else {
+                            _registerSuccess.value = false
+                        }
                     }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("Register", "注册失败: $errorBody")
+
+                    override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
+                        _registerSuccess.value = false
+                    }
+                })
+        } else {
+            // 没有头像，直接注册
+            sendRegister(username, password, "")
+        }
+//        val usernameBody = username.toRequestBody("text/plain".toMediaType())
+//        val passwordBody = password.toRequestBody("text/plain".toMediaType())
+//
+//        val avatarPart: MultipartBody.Part? = avatarUri?.let { uri ->
+//            val file = uriToFile(context, uri)
+//            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+//            MultipartBody.Part.createFormData("avatar", file.name, requestFile)
+//        }
+//
+//        // 向后端发送注册请求
+//        apiService.registerUserWithAvatar(
+//            username = usernameBody,
+//            password = passwordBody,
+//            avatar = avatarPart,
+//        ).enqueue(object : Callback<RegisterResponse> {
+//            override fun onResponse(
+//                call: Call<RegisterResponse>,
+//                response: Response<RegisterResponse>
+//            ) {
+//                if (response.isSuccessful) {
+//                    // 后端注册成功后，保存用户到本地数据库
+//                    viewModelScope.launch(Dispatchers.IO) {
+////                        userDao.insertUser(user)
+//                        _registerSuccess.value = true
+//                        delay(2000)  // 延时2秒后重置状态
+//                        resetState()
+//                    }
+//                } else {
+//                    val errorBody = response.errorBody()?.string()
+//                    Log.e("Register", "注册失败: $errorBody")
+//                    _registerSuccess.value = false
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
+//                _registerSuccess.value = false
+//            }
+//        })
+    }
+
+    private fun sendRegister(username: String, password: String, avatarUrl: String) {
+        val request = RegisterRequest(
+            username  = username,
+            password  = password,
+            avatarUri = avatarUrl
+        )
+        apiService.registerUser(request)
+            .enqueue(object : Callback<RegisterResponse> {
+                override fun onResponse(
+                    call: Call<RegisterResponse>,
+                    response: Response<RegisterResponse>
+                ) {
+                    _registerSuccess.value = response.isSuccessful
+                }
+
+                override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
                     _registerSuccess.value = false
                 }
-            }
-
-            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
-                _registerSuccess.value = false
-            }
-        })
+            })
     }
 
     private fun uriToFile(context: Context, uri: Uri): File {

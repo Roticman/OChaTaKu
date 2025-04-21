@@ -1,7 +1,9 @@
 // ✅ 整合导航：MainActivity.kt（无嵌套 NavController）
 package com.example.ochataku.ui
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -103,32 +105,46 @@ class MainActivity : ComponentActivity() {
                             // 2. 渲染会话列表，并传入 onConversationClick 回调
                             ConversationScreen(
                                 userId = currentUserId,
-                                onConversationClick = { convId, peerName, isGroup ->
+                                onConversationClick = { convId, peerId, peerName, isGroup, peerAvatar ->
                                     // 3. 直接用一个路由区分私聊/群聊
-                                    navController.navigate("chat/$convId/$peerName/$isGroup")
+                                    val encodedName = Uri.encode(peerName)
+                                    val encodedUrl  = Uri.encode(peerAvatar)
+                                    navController.navigate("chat/$convId/$peerId/$encodedName/$isGroup/$encodedUrl")
                                 }
                             )
                         }
 
 
                         composable(
-                            route = "chat/{convId}/{peerName}/{isGroup}",
+                            route = "chat/{convId}/{peerId}/{peerName}/{isGroup}/{peerAvatar}",
                             arguments = listOf(
                                 navArgument("convId") { type = NavType.LongType },
-                                navArgument("isGroup") { type = NavType.BoolType }
+                                navArgument("peerId") { type = NavType.LongType },
+                                navArgument("peerName") { type = NavType.StringType },
+                                navArgument("isGroup") { type = NavType.BoolType },
+                                navArgument("peerAvatar") { type = NavType.StringType }
                             )
                         ) { backStackEntry ->
                             val convId = backStackEntry.arguments!!.getLong("convId")
+                            val peerId = backStackEntry.arguments!!.getLong("peerId")
                             val peerName = backStackEntry.arguments!!.getString("peerName")!!
                             val isGroup = backStackEntry.arguments!!.getBoolean("isGroup")
+                            // 解码回原始 URL
+                            val mediaUrlEncoded = backStackEntry.arguments!!.getString("peerAvatar")!!
+                            val mediaUrl = Uri.decode(mediaUrlEncoded)
                             val currentUserId = AuthManager(LocalContext.current).getUserId()
+                            val currentUserAvatar =
+                                AuthManager(LocalContext.current).getUserAvatar()
 
                             ChatScreen(
                                 navController = navController,
                                 convId = convId,
+                                peerId = peerId,
                                 peerName = peerName,
                                 isGroup = isGroup,
-                                currentUserId = currentUserId
+                                currentUserId = currentUserId,
+                                peerAvatarUrl = mediaUrl,
+                                currentUserAvatarUrl = currentUserAvatar
                             )
                         }
 
