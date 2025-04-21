@@ -2,11 +2,16 @@ package com.example.ochataku.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import android.widget.VideoView
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -18,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +31,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -54,7 +61,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,7 +71,9 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -71,14 +82,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.service.ApiClient.connectAndListen
 import com.example.ochataku.service.MessageDisplay
 import com.example.ochataku.viewmodel.ChatViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
 import java.net.URL
@@ -90,6 +108,7 @@ import java.util.Date
 var mediaRecorder: MediaRecorder? = null
 var audioFilePath: String? = null
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -100,17 +119,101 @@ fun ChatScreen(
     isGroup: Boolean,
     currentUserId: Long,
     peerAvatarUrl: String?,
-    currentUserAvatarUrl: String?
+    currentUserAvatarUrl: String?,
 ) {
     val viewModel: ChatViewModel = hiltViewModel()
     val context = LocalContext.current
     val messages by viewModel.messages.collectAsState()
     var messageText by remember { mutableStateOf(TextFieldValue()) }
+    val listState = rememberLazyListState()
+    var lastMessageCount by remember { mutableStateOf(0) }
 
     // 屏幕宽度，用于气泡最大宽度
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxBubbleWidth = screenWidth * 0.7f
     val minBubbleWidth = 64.dp
+
+    var isDialogOpen by remember { mutableStateOf(false) }
+    var showConfirmSendDialog by remember { mutableStateOf(false) }
+    var showCameraOptionDialog by remember { mutableStateOf(false) }
+    var selectedMediaUri by remember { mutableStateOf<Uri?>(null) }
+    var firstLoadDone by remember { mutableStateOf(false) }
+
+
+// 相册选择媒体（图片/视频）
+    val mediaPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            selectedMediaUri = it
+            showConfirmSendDialog = true
+        }
+    }
+
+// 拍照
+    val imageCaptureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        bitmap?.let {
+            val file = File(context.cacheDir, "captured_image.jpg")
+            file.outputStream().use { out ->
+                it.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            }
+            selectedMediaUri = Uri.fromFile(file)
+            showConfirmSendDialog = true
+        }
+    }
+
+// 录像
+    val videoCaptureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CaptureVideo()
+    ) { success ->
+        if (success && selectedMediaUri != null) {
+            showConfirmSendDialog = true
+        }
+    }
+    val coroutineScope = rememberCoroutineScope()
+    var showNewMessageHint by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(messages.size) {
+        val lastIndex = messages.lastIndex
+        if (lastIndex >= 0) {
+            delay(100) // ✅ 等待 Compose 布局完成
+
+            val layoutInfo = listState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            val isAtBottom = visibleItems.any { it.index == lastIndex }
+
+            if (!firstLoadDone) {
+                coroutineScope.launch {
+                    listState.scrollToItem(index = lastIndex)
+                }
+                firstLoadDone = true
+                showNewMessageHint = false
+            } else if (!isAtBottom && messages.size > lastMessageCount) {
+                showNewMessageHint = true
+            } else {
+                showNewMessageHint = false
+            }
+
+            lastMessageCount = messages.size
+        }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val lastIndex = messages.lastIndex
+            val visibleItems = listState.layoutInfo.visibleItemsInfo
+            visibleItems.any { it.index == lastIndex }
+        }
+            .distinctUntilChanged()
+            .collectLatest { isAtBottom ->
+                if (isAtBottom) {
+                    showNewMessageHint = false
+                }
+            }
+    }
 
 
     // 加载消息（网络优先，失败回退本地）
@@ -118,7 +221,11 @@ fun ChatScreen(
         viewModel.loadMessagesByConvId(context, convId)
         connectAndListen(convId) { messageJson ->
             val message = parseMessage(messageJson)
-            viewModel.addMessage(message) // 添加到 UI 列表中
+            coroutineScope.launch {
+                viewModel.addMessage(message)
+                delay(100)
+                listState.animateScrollToItem(messages.lastIndex)
+            }
         }
     }
 
@@ -252,6 +359,12 @@ fun ChatScreen(
                                 if (success) {
                                     viewModel.loadMessagesByConvId(context, convId)
                                     messageText = TextFieldValue()
+                                    // 新增：发送成功后滚动到底部
+                                    coroutineScope.launch {
+                                        // 等待一下布局完成
+                                        delay(100)
+                                        listState.animateScrollToItem(messages.lastIndex)
+                                    }
                                 }
                             }
                         }) {
@@ -271,28 +384,65 @@ fun ChatScreen(
                     text = {
                         Column {
                             TextButton(onClick = {
-                                Toast.makeText(context, "选择照片（模拟）", Toast.LENGTH_SHORT).show()
                                 isDialogOpen = false
+                                mediaPickerLauncher.launch("*/*")
                             }) {
-                                Text("选择照片")
+                                Text("从相册选择图片或视频")
                             }
                             TextButton(onClick = {
-                                Toast.makeText(context, "拍照（模拟）", Toast.LENGTH_SHORT).show()
                                 isDialogOpen = false
+                                showCameraOptionDialog = true
                             }) {
-                                Text("拍照")
+                                Text("使用相机拍摄")
                             }
                         }
                     }
                 )
+                if (showCameraOptionDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showCameraOptionDialog = false },
+                        title = { Text("选择拍摄类型") },
+                        confirmButton = {},
+                        text = {
+                            Column {
+                                TextButton(onClick = {
+                                    showCameraOptionDialog = false
+                                    imageCaptureLauncher.launch(null)
+                                }) {
+                                    Text("拍照")
+                                }
+                                TextButton(onClick = {
+                                    showCameraOptionDialog = false
+                                    val videoFile = File(
+                                        context.cacheDir,
+                                        "recorded_video_${System.currentTimeMillis()}.mp4"
+                                    )
+                                    selectedMediaUri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        videoFile
+                                    )
+                                    videoCaptureLauncher.launch(selectedMediaUri)
+                                }) {
+                                    Text("录制视频")
+                                }
+                            }
+                        }
+                    )
+                }
+
             }
+
         }
     ) { padding ->
+
         LazyColumn(
+            state = listState,
             contentPadding = padding,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 8.dp)
+                .imePadding() // ⬅️ 关键
 
         ) {
             items(items = messages) { msg: MessageDisplay ->
@@ -333,74 +483,211 @@ fun ChatScreen(
                             )
                         }
                         // 气泡
-                        val bubbleWidth = when (msg.message_type) {
-                            "voice" -> {
-                                // 用本地文件大小决定宽度，最大 200KB
-                                val size = getFileSizeFromUrl(msg.media_url!!)
-                                val maxSize = 200 * 1024L
-                                val frac = (size.toFloat() / maxSize).coerceIn(0f, 1f)
-                                minBubbleWidth + (maxBubbleWidth - minBubbleWidth) * frac
-                            }
+//                        val bubbleWidth = when (msg.message_type) {
+//                            "voice" -> {
+//                                // 用本地文件大小决定宽度，最大 200KB
+//                                val size = getFileSizeFromUrl(msg.media_url!!)
+//                                val maxSize = 200 * 1024L
+//                                val frac = (size.toFloat() / maxSize).coerceIn(0f, 1f)
+//                                minBubbleWidth + (maxBubbleWidth - minBubbleWidth) * frac
+//                            }
+//
+//                            else -> maxBubbleWidth
+//                        }.coerceAtMost(maxBubbleWidth)
+                        val mediaPath = "$BASE_URL${msg.media_url}"
+                        when (msg.message_type) {
 
-                            else -> maxBubbleWidth
-                        }.coerceAtMost(maxBubbleWidth)
-
-                        if (msg.message_type == "voice" && msg.media_url != null) {
-                            // 独立显示语音消息
-                            val durationSec = remember(msg.media_url) {
-                                mutableIntStateOf(getDurationFromUrl("$BASE_URL${msg.media_url}"))
-                            }
-                            val width =
-                                minBubbleWidth + (maxBubbleWidth - minBubbleWidth) * (durationSec.value / 60f).coerceIn(
-                                    0f,
-                                    1f
-                                )
-
-                            Card(
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .width(width)
-                                    .clickable {
-                                        viewModel.playAudio(context, "$BASE_URL${msg.media_url}")
-                                    },
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F7FA))
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                            "text" -> {
+                                // 使用气泡显示文本消息
+                                Surface(
+                                    shape = chatBubbleShape(isSelf),
+                                    color = if (isSelf)
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.surfaceVariant,
+                                    modifier = Modifier
+                                        .widthIn(min = minBubbleWidth, max = maxBubbleWidth)
+                                        .wrapContentWidth()
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = "播放语音")
-                                    Spacer(Modifier.width(6.dp))
                                     Text(
-                                        "${durationSec.value}″",
-                                        modifier = Modifier.padding(start = 2.dp)
+                                        text = msg.content,
+                                        color = Color.Black,
+                                        modifier = Modifier.padding(
+                                            horizontal = 12.dp,
+                                            vertical = 8.dp
+                                        ),
+                                        fontSize = 16.sp
                                     )
                                 }
                             }
 
-                        } else {
-                            // 使用气泡显示文本消息
-                            Surface(
-                                shape = chatBubbleShape(isSelf),
-                                color = if (isSelf)
-                                    MaterialTheme.colorScheme.primaryContainer
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier
-                                    .widthIn(min = minBubbleWidth, max = maxBubbleWidth)
-                                    .wrapContentWidth()
-                            ) {
-                                Text(
-                                    text = msg.content,
-                                    color = Color.Black,
-                                    modifier = Modifier.padding(
-                                        horizontal = 12.dp,
-                                        vertical = 8.dp
-                                    ),
-                                    fontSize = 16.sp
+                            "image" -> {
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = msg.media_url),
+                                    contentDescription = "Image",
+                                    modifier = Modifier
+                                        .size(150.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
                                 )
                             }
+
+                            "voice" -> {
+                                val durationSec = remember(msg.media_url) {
+                                    mutableIntStateOf(getDurationFromUrl(mediaPath))
+                                }
+                                val width =
+                                    minBubbleWidth + (maxBubbleWidth - minBubbleWidth) * (durationSec.intValue / 60f).coerceIn(
+                                        0f,
+                                        1f
+                                    )
+                                Card(
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .width(width)
+                                        .clickable {
+                                            viewModel.playAudio(
+                                                context,
+                                                "$BASE_URL${msg.media_url}"
+                                            )
+                                        },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(
+                                            0xFFE0F7FA
+                                        )
+                                    )
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Default.PlayArrow,
+                                            contentDescription = "播放语音"
+                                        )
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(
+                                            "${durationSec.value}″",
+                                            modifier = Modifier.padding(start = 2.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            "video" -> {
+                                val videoUrl = "$BASE_URL${msg.media_url}"
+                                val thumbnail = remember(videoUrl) {
+                                    getVideoThumbnailBitmap(context, videoUrl)
+                                }
+                                var isPlaying by remember { mutableStateOf(false) }
+
+                                if (!isPlaying) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(width = 200.dp, height = 120.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable { isPlaying = true }
+                                    ) {
+                                        if (thumbnail != null) {
+                                            Image(
+                                                bitmap = thumbnail.asImageBitmap(),
+                                                contentDescription = "视频缩略图",
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(Color.Black)
+                                            )
+                                        }
+
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = "播放视频",
+                                            tint = Color.White,
+                                            modifier = Modifier
+                                                .size(48.dp)
+                                                .align(Alignment.Center)
+                                        )
+                                    }
+                                } else {
+                                    AndroidView(
+                                        factory = {
+                                            VideoView(it).apply {
+                                                setVideoURI(Uri.parse(videoUrl))
+                                                setOnPreparedListener { mp ->
+                                                    mp.setVolume(1f, 1f)
+                                                    start()
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .size(width = 200.dp, height = 120.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                    )
+                                }
+                            }
+
                         }
+
+//                        if (msg.message_type == "voice" && msg.media_url != null) {
+//                            // 独立显示语音消息
+//                            val durationSec = remember(msg.media_url) {
+//                                mutableIntStateOf(getDurationFromUrl("$BASE_URL${msg.media_url}"))
+//                            }
+//                            val width =
+//                                minBubbleWidth + (maxBubbleWidth - minBubbleWidth) * (durationSec.value / 60f).coerceIn(
+//                                    0f,
+//                                    1f
+//                                )
+//
+//                            Card(
+//                                modifier = Modifier
+//                                    .padding(4.dp)
+//                                    .width(width)
+//                                    .clickable {
+//                                        viewModel.playAudio(context, "$BASE_URL${msg.media_url}")
+//                                    },
+//                                colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F7FA))
+//                            ) {
+//                                Row(
+//                                    modifier = Modifier.padding(8.dp),
+//                                    verticalAlignment = Alignment.CenterVertically
+//                                ) {
+//                                    Icon(Icons.Default.PlayArrow, contentDescription = "播放语音")
+//                                    Spacer(Modifier.width(6.dp))
+//                                    Text(
+//                                        "${durationSec.value}″",
+//                                        modifier = Modifier.padding(start = 2.dp)
+//                                    )
+//                                }
+//                            }
+//
+//                        } else {
+//                            // 使用气泡显示文本消息
+//                            Surface(
+//                                shape = chatBubbleShape(isSelf),
+//                                color = if (isSelf)
+//                                    MaterialTheme.colorScheme.primaryContainer
+//                                else
+//                                    MaterialTheme.colorScheme.surfaceVariant,
+//                                modifier = Modifier
+//                                    .widthIn(min = minBubbleWidth, max = maxBubbleWidth)
+//                                    .wrapContentWidth()
+//                            ) {
+//                                Text(
+//                                    text = msg.content,
+//                                    color = Color.Black,
+//                                    modifier = Modifier.padding(
+//                                        horizontal = 12.dp,
+//                                        vertical = 8.dp
+//                                    ),
+//                                    fontSize = 16.sp
+//                                )
+//                            }
+//                        }
 
                     }
 
@@ -423,78 +710,29 @@ fun ChatScreen(
                 }
             }
         }
+        if (showNewMessageHint) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 80.dp, end = 16.dp),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(messages.lastIndex)
+                        }
+                        showNewMessageHint = false
+                    },
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text("有新消息")
+                }
+            }
+        }
+
     }
 }
-
-fun getDurationFromUrl(url: String): Int {
-    return try {
-        val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(url, HashMap())
-        val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-        retriever.release()
-        val durationMs = durationStr?.toLongOrNull() ?: 0L
-        (durationMs / 1000).toInt()
-    } catch (e: Exception) {
-        e.printStackTrace()
-        0
-    }
-}
-
-
-fun getFileSizeFromUrl(fileUrl: String): Long {
-    return try {
-        val url = URL(fileUrl)
-        val connection = url.openConnection()
-        connection.connect()
-        connection.contentLengthLong // 获取文件大小（字节）
-    } catch (e: Exception) {
-        e.printStackTrace()
-        0L // 获取失败时返回 0
-    }
-}
-
-
-fun parseMessage(json: JSONObject): MessageDisplay {
-    val rowGroup = json.getBoolean("is_group")
-    return MessageDisplay(
-        conv_id = json.getLong("conv_id"),
-        sender_id = json.getLong("sender_id"),
-        sender_name = json.getString("sender_name"),
-        sender_avatar = json.getString("sender_avatar"),
-        content = json.getString("content"),
-        timestamp = json.getLong("timestamp"),
-        is_group = if (rowGroup) 1 else 0,
-        message_type = json.getString("message_type"),
-        media_url = if (json.has("media_url") && !json.isNull("media_url")) json.getString("media_url") else null,
-    )
-}
-
-@SuppressLint("SimpleDateFormat")
-fun startRecording(context: Context) {
-    val outputDir = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-    val fileName = "REC_${SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())}.mp3"
-    val outputFile = File(outputDir, fileName)
-    audioFilePath = outputFile.absolutePath
-
-    mediaRecorder = MediaRecorder().apply {
-        setAudioSource(MediaRecorder.AudioSource.MIC)
-        setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-        setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        setOutputFile(audioFilePath)
-        prepare()
-        start()
-    }
-}
-
-fun stopRecording(onComplete: (String) -> Unit) {
-    mediaRecorder?.apply {
-        stop()
-        release()
-    }
-    mediaRecorder = null
-    audioFilePath?.let { onComplete(it) }
-}
-
 
 @Composable
 fun chatBubbleShape(
@@ -541,4 +779,87 @@ fun chatBubbleShape(
             close()
         }
     }
+}
+
+
+fun getDurationFromUrl(url: String): Int {
+    return try {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(url, HashMap())
+        val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        retriever.release()
+        val durationMs = durationStr?.toLongOrNull() ?: 0L
+        (durationMs / 1000).toInt()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        0
+    }
+}
+
+
+fun getFileSizeFromUrl(fileUrl: String): Long {
+    return try {
+        val url = URL(fileUrl)
+        val connection = url.openConnection()
+        connection.connect()
+        connection.contentLengthLong // 获取文件大小（字节）
+    } catch (e: Exception) {
+        e.printStackTrace()
+        0L // 获取失败时返回 0
+    }
+}
+
+fun getVideoThumbnailBitmap(context: Context, videoUrl: String): Bitmap? {
+    return try {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(videoUrl, HashMap())
+        val bitmap = retriever.getFrameAtTime(1_000_000) // 1秒处
+        retriever.release()
+        bitmap
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+
+fun parseMessage(json: JSONObject): MessageDisplay {
+    val rowGroup = json.getBoolean("is_group")
+    return MessageDisplay(
+        conv_id = json.getLong("conv_id"),
+        sender_id = json.getLong("sender_id"),
+        sender_name = json.getString("sender_name"),
+        sender_avatar = json.getString("sender_avatar"),
+        content = json.getString("content"),
+        timestamp = json.getLong("timestamp"),
+        is_group = if (rowGroup) 1 else 0,
+        message_type = json.getString("message_type"),
+        media_url = if (json.has("media_url") && !json.isNull("media_url")) json.getString("media_url") else null,
+    )
+}
+
+@SuppressLint("SimpleDateFormat")
+fun startRecording(context: Context) {
+    val outputDir = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+    val fileName = "REC_${SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())}.mp3"
+    val outputFile = File(outputDir, fileName)
+    audioFilePath = outputFile.absolutePath
+
+    mediaRecorder = MediaRecorder().apply {
+        setAudioSource(MediaRecorder.AudioSource.MIC)
+        setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+        setOutputFile(audioFilePath)
+        prepare()
+        start()
+    }
+}
+
+fun stopRecording(onComplete: (String) -> Unit) {
+    mediaRecorder?.apply {
+        stop()
+        release()
+    }
+    mediaRecorder = null
+    audioFilePath?.let { onComplete(it) }
 }

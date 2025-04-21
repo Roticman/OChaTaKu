@@ -14,8 +14,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="00:00"
-        android:visibility="invisible"
         android:textColor="@color/white"
+        android:visibility="invisible"
         tools:visibility="visible" />
 
     <RelativeLayout
@@ -41,8 +41,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/white"
-                android:text="静音" />
+                android:text="静音"
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -63,8 +63,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/white"
-                android:text="挂断" />
+                android:text="挂断"
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -85,8 +85,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/white"
-                android:text="免提" />
+                android:text="免提"
+                android:textColor="@color/white" />
 
         </LinearLayout>
     </RelativeLayout>

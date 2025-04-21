@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:layout_maxHeight="100dp"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    app:layout_maxHeight="100dp">
 
     <TextView
+        android:id="@+id/senderTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/senderTextView"
         android:ellipsize="end"
         android:maxEms="5"
         android:maxLines="1"
@@ -23,9 +23,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:textColor="@color/gray3"
         android:ellipsize="end"
         android:maxLines="5"
+        android:textColor="@color/gray3"
         tools:text="a long text text text text text text text text text text text text text text text text text text text text text text message" />
 
 </LinearLayout>

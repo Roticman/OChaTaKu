@@ -53,7 +53,7 @@ object AppModule {
     }
 
 
-//    @Provides
+    //    @Provides
 //    fun provideGroupDao(db: AppDatabase): GroupDao {
 //        return db.groupDao()
 //    }
@@ -67,7 +67,8 @@ object AppModule {
     fun provideMessageDao(db: AppDatabase): MessageDao {
         return db.MessageDao()
     }
-//
+
+    //
 //    @Provides
 //    fun provideFriendDao(db: AppDatabase): FriendDao {
 //        return db.friendDao()

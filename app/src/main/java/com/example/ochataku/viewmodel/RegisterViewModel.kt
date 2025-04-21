@@ -107,8 +107,8 @@ class RegisterViewModel @Inject constructor(
 
     private fun sendRegister(username: String, password: String, avatarUrl: String) {
         val request = RegisterRequest(
-            username  = username,
-            password  = password,
+            username = username,
+            password = password,
             avatarUri = avatarUrl
         )
         apiService.registerUser(request)

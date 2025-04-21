@@ -55,10 +55,10 @@
 
     <!--圆角Dialog-->
 
-<!--    &lt;!&ndash;自定义CheckBox样式&ndash;&gt;-->
-<!--    <style name="CustomCheckboxTheme" parent="@android:style/Widget.CompoundButton.CheckBox">-->
-<!--        <item name="android:button">@drawable/checkbox_style</item>-->
-<!--    </style>-->
+    <!--    &lt;!&ndash;自定义CheckBox样式&ndash;&gt;-->
+    <!--    <style name="CustomCheckboxTheme" parent="@android:style/Widget.CompoundButton.CheckBox">-->
+    <!--        <item name="android:button">@drawable/checkbox_style</item>-->
+    <!--    </style>-->
 
     <!--实下滑线样式-->
     <style name="Line">

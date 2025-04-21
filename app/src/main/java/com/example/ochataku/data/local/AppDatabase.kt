@@ -21,7 +21,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun MessageDao(): MessageDao
     abstract fun groupDao(): GroupDao
-//    abstract fun groupMemberDao(): GroupMemberDao
+
+    //    abstract fun groupMemberDao(): GroupMemberDao
 //    abstract fun friendDao(): FriendDao
 //    abstract fun friendNoteDao(): FriendNoteDao
     abstract fun ConversationDao(): ConversationDao

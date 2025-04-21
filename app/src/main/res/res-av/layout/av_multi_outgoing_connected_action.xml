@@ -101,10 +101,10 @@
         <ImageView
             android:id="@+id/shareScreenImageView"
             android:layout_width="60dp"
-            android:visibility="gone"
             android:layout_height="60dp"
             android:layout_marginLeft="30dp"
-            android:src="@drawable/av_share" />
+            android:src="@drawable/av_share"
+            android:visibility="gone" />
 
     </LinearLayout>
 

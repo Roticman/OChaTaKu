@@ -32,8 +32,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/white"
-                android:text="挂断" />
+                android:text="挂断"
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -55,8 +55,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/white"
-                android:text="接听" />
+                android:text="接听"
+                android:textColor="@color/white" />
 
         </LinearLayout>
     </RelativeLayout>

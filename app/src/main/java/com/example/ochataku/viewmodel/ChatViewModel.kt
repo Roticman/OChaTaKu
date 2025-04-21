@@ -311,7 +311,7 @@ class ChatViewModel @Inject constructor(
             stopAudio() // 若已有音频在播放，先停止
 
             mediaPlayer = MediaPlayer().apply {
-                    setDataSource(filePath)
+                setDataSource(filePath)
                 setAudioStreamType(AudioManager.STREAM_MUSIC)
                 prepare()
                 start()
@@ -343,7 +343,8 @@ class ChatViewModel @Inject constructor(
         return try {
             val retriever = MediaMetadataRetriever()
             retriever.setDataSource(audioUrl, HashMap()) // 网络音频
-            val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            val durationStr =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
             retriever.release()
             (durationStr?.toIntOrNull()?.div(1000)) ?: 0
         } catch (e: Exception) {

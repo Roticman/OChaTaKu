@@ -40,7 +40,7 @@ class LoginViewModel @Inject constructor(
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful && response.body()?.user != null) {
                     val user = response.body()!!.user
-                    Log.d("登陆成功","-----------------")
+                    Log.d("登陆成功", "-----------------")
 
                     // 成功：保存本地登录状态
                     viewModelScope.launch(Dispatchers.IO) {

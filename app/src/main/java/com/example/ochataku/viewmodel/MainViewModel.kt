@@ -29,7 +29,7 @@ class MainViewModel @Inject constructor(
     fun refreshLoginStatus() {
         val logged = authManager.isLoggedIn()
         _uiState.value = if (logged) UiState.LoggedIn else UiState.LoggedOut
-        Log.d("refreshLoginStatus","!!!!!!!!!!!!!!!!!!!")
+        Log.d("refreshLoginStatus", "!!!!!!!!!!!!!!!!!!!")
     }
 
 

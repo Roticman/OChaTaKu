@@ -42,7 +42,11 @@ import com.example.ochataku.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltViewModel(), mainViewModel: MainViewModel) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel
+) {
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -60,14 +64,16 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
                 isLoading = false
                 Toast.makeText(context, "登录成功", Toast.LENGTH_SHORT).show()
                 mainViewModel.refreshLoginStatus()
-                navController.navigate("conversation"){
+                navController.navigate("conversation") {
                     popUpTo(0) { inclusive = true }
                 }
             }
+
             is LoginState.Error -> {
                 isLoading = false
                 errorMessage = (loginState as LoginState.Error).message
             }
+
             else -> {}
         }
     }
