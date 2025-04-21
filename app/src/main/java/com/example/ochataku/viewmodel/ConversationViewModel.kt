@@ -7,10 +7,14 @@ import com.example.ochataku.data.local.conversation.ConversationDao
 import com.example.ochataku.data.local.conversation.ConversationDisplay
 import com.example.ochataku.data.local.conversation.ConversationEntity
 import com.example.ochataku.service.ApiClient
+import com.example.ochataku.service.ApiClient.apiService
 import com.example.ochataku.service.ConversationResponse
+import com.example.ochataku.service.GroupMember
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -24,6 +28,10 @@ class ConversationViewModel @Inject constructor(
 
     private val _conversations = MutableStateFlow<List<ConversationDisplay>>(emptyList())
     val conversations: StateFlow<List<ConversationDisplay>> = _conversations
+
+    // convId -> 群成员头像列表
+    private val _groupMembersMap = MutableStateFlow<Map<Long, List<String>>>(emptyMap())
+    val groupMembersMap: StateFlow<Map<Long, List<String>>> = _groupMembersMap.asStateFlow()
 
 
     fun loadConversations(userId: Long) {
@@ -93,6 +101,20 @@ class ConversationViewModel @Inject constructor(
         })
     }
 
+    // 加载单个群聊的成员头像
+    fun loadGroupMembers(convId: Long) {
+        viewModelScope.launch {
+            try {
+                val members: List<GroupMember> = apiService.getGroupMembersAsync(convId) // suspend 函数
+                val avatars = members.map { it.avatar }
+                _groupMembersMap.update { it + (convId to avatars) }
+            } catch (e: Exception) {
+                // 出错时保持原状态或记录日志
+                e.printStackTrace()
+            }
+        }
+    }
+
     private suspend fun fetchUserInfo(userId: Long): Pair<String, String?> {
         return try {
             val response = ApiClient.apiService.getUserById(userId)
@@ -112,7 +134,7 @@ class ConversationViewModel @Inject constructor(
             val response = ApiClient.apiService.getGroupById(groupId)
             if (response.isSuccessful) {
                 val group = response.body()
-                Pair(group?.groupName ?: "群聊", group?.avatar)
+                Pair(group?.group_name ?: "群聊", group?.avatar)
             } else {
                 Pair("群聊", null)
             }

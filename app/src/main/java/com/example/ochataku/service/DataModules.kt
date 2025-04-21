@@ -10,8 +10,14 @@ data class UserSimple(
     val avatar: String
 )
 
+// 假设后端返回的群成员数据模型
+data class GroupMember(
+    val userId: Long,
+    val avatar: String
+)
+
 data class GroupSimple(
-    val groupName: String,
+    val group_name: String,
     val avatar: String
 )
 

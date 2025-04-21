@@ -64,6 +64,11 @@ interface ApiService {
         @Path("userId") userId: Long
     ): Call<List<ConversationResponse>>
 
+    @GET("/api/conversation/list/group_member/{convId}")
+    suspend fun getGroupMembersAsync(
+        @Path("convId") convId: Long
+    ): List<GroupMember>
+
     // 用户/群组信息
     @GET("/api/conversation/user_simple/{id}")
     suspend fun getUserById(

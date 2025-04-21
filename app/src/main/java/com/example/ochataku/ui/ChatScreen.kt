@@ -133,9 +133,7 @@ fun ChatScreen(
     val maxBubbleWidth = screenWidth * 0.7f
     val minBubbleWidth = 64.dp
 
-    var isDialogOpen by remember { mutableStateOf(false) }
     var showConfirmSendDialog by remember { mutableStateOf(false) }
-    var showCameraOptionDialog by remember { mutableStateOf(false) }
     var selectedMediaUri by remember { mutableStateOf<Uri?>(null) }
     var firstLoadDone by remember { mutableStateOf(false) }
 
@@ -232,7 +230,7 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(peerName) },
+                title = { Text(peerName,fontSize = 18.sp) },
                 actions = {
                     IconButton(onClick = {
                         val route = if (isGroup) "groupDetail/$convId" else "chatDetail/$convId"
@@ -240,7 +238,7 @@ fun ChatScreen(
                     }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "更多")
                     }
-                }
+                },
             )
         },
         bottomBar = {
@@ -248,6 +246,7 @@ fun ChatScreen(
             var isRecording by remember { mutableStateOf(false) }
             var isDialogOpen by remember { mutableStateOf(false) }
             Surface(
+                modifier = Modifier.imePadding(),
                 color = MaterialTheme.colorScheme.background, // 显式设置底部栏背景
                 tonalElevation = 3.dp
             ) {
@@ -375,62 +374,20 @@ fun ChatScreen(
                 }
             }
 
-            // 弹出工具栏
+            // 单一 Dialog：相册 / 拍照 / 拍视频
             if (isDialogOpen) {
-                AlertDialog(
-                    onDismissRequest = { isDialogOpen = false },
-                    title = { Text("选择功能") },
-                    confirmButton = {},
-                    text = {
-                        Column {
-                            TextButton(onClick = {
-                                isDialogOpen = false
-                                mediaPickerLauncher.launch("*/*")
-                            }) {
-                                Text("从相册选择图片或视频")
-                            }
-                            TextButton(onClick = {
-                                isDialogOpen = false
-                                showCameraOptionDialog = true
-                            }) {
-                                Text("使用相机拍摄")
-                            }
-                        }
+                AlertDialog(onDismissRequest = { isDialogOpen = false }, title = { Text("选择功能") }, confirmButton = {}, text = {
+                    Column {
+                        TextButton(onClick = { isDialogOpen = false; mediaPickerLauncher.launch("*/*") }) { Text("从相册选择") }
+                        TextButton(onClick = { isDialogOpen = false; imageCaptureLauncher.launch(null) }) { Text("拍照") }
+                        TextButton(onClick = {
+                            isDialogOpen = false
+                            val vf = File(context.cacheDir, "recorded_video_${System.currentTimeMillis()}.mp4")
+                            selectedMediaUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", vf)
+                            videoCaptureLauncher.launch(selectedMediaUri)
+                        }) { Text("拍视频") }
                     }
-                )
-                if (showCameraOptionDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showCameraOptionDialog = false },
-                        title = { Text("选择拍摄类型") },
-                        confirmButton = {},
-                        text = {
-                            Column {
-                                TextButton(onClick = {
-                                    showCameraOptionDialog = false
-                                    imageCaptureLauncher.launch(null)
-                                }) {
-                                    Text("拍照")
-                                }
-                                TextButton(onClick = {
-                                    showCameraOptionDialog = false
-                                    val videoFile = File(
-                                        context.cacheDir,
-                                        "recorded_video_${System.currentTimeMillis()}.mp4"
-                                    )
-                                    selectedMediaUri = FileProvider.getUriForFile(
-                                        context,
-                                        "${context.packageName}.provider",
-                                        videoFile
-                                    )
-                                    videoCaptureLauncher.launch(selectedMediaUri)
-                                }) {
-                                    Text("录制视频")
-                                }
-                            }
-                        }
-                    )
-                }
-
+                })
             }
 
         }
@@ -456,7 +413,8 @@ fun ChatScreen(
                 ) {
                     // 对方头像
                     if (!isSelf) {
-                        val imageUrl = "$BASE_URL${peerAvatarUrl}"
+                        val avatarPath = if (isGroup) msg.sender_avatar else peerAvatarUrl
+                        val imageUrl = "$BASE_URL${avatarPath}"
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(imageUrl)
@@ -482,18 +440,6 @@ fun ChatScreen(
                                 modifier = Modifier.padding(bottom = 2.dp)
                             )
                         }
-                        // 气泡
-//                        val bubbleWidth = when (msg.message_type) {
-//                            "voice" -> {
-//                                // 用本地文件大小决定宽度，最大 200KB
-//                                val size = getFileSizeFromUrl(msg.media_url!!)
-//                                val maxSize = 200 * 1024L
-//                                val frac = (size.toFloat() / maxSize).coerceIn(0f, 1f)
-//                                minBubbleWidth + (maxBubbleWidth - minBubbleWidth) * frac
-//                            }
-//
-//                            else -> maxBubbleWidth
-//                        }.coerceAtMost(maxBubbleWidth)
                         val mediaPath = "$BASE_URL${msg.media_url}"
                         when (msg.message_type) {
 
@@ -631,64 +577,6 @@ fun ChatScreen(
                             }
 
                         }
-
-//                        if (msg.message_type == "voice" && msg.media_url != null) {
-//                            // 独立显示语音消息
-//                            val durationSec = remember(msg.media_url) {
-//                                mutableIntStateOf(getDurationFromUrl("$BASE_URL${msg.media_url}"))
-//                            }
-//                            val width =
-//                                minBubbleWidth + (maxBubbleWidth - minBubbleWidth) * (durationSec.value / 60f).coerceIn(
-//                                    0f,
-//                                    1f
-//                                )
-//
-//                            Card(
-//                                modifier = Modifier
-//                                    .padding(4.dp)
-//                                    .width(width)
-//                                    .clickable {
-//                                        viewModel.playAudio(context, "$BASE_URL${msg.media_url}")
-//                                    },
-//                                colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F7FA))
-//                            ) {
-//                                Row(
-//                                    modifier = Modifier.padding(8.dp),
-//                                    verticalAlignment = Alignment.CenterVertically
-//                                ) {
-//                                    Icon(Icons.Default.PlayArrow, contentDescription = "播放语音")
-//                                    Spacer(Modifier.width(6.dp))
-//                                    Text(
-//                                        "${durationSec.value}″",
-//                                        modifier = Modifier.padding(start = 2.dp)
-//                                    )
-//                                }
-//                            }
-//
-//                        } else {
-//                            // 使用气泡显示文本消息
-//                            Surface(
-//                                shape = chatBubbleShape(isSelf),
-//                                color = if (isSelf)
-//                                    MaterialTheme.colorScheme.primaryContainer
-//                                else
-//                                    MaterialTheme.colorScheme.surfaceVariant,
-//                                modifier = Modifier
-//                                    .widthIn(min = minBubbleWidth, max = maxBubbleWidth)
-//                                    .wrapContentWidth()
-//                            ) {
-//                                Text(
-//                                    text = msg.content,
-//                                    color = Color.Black,
-//                                    modifier = Modifier.padding(
-//                                        horizontal = 12.dp,
-//                                        vertical = 8.dp
-//                                    ),
-//                                    fontSize = 16.sp
-//                                )
-//                            }
-//                        }
-
                     }
 
                     // 自己头像
