@@ -8,7 +8,6 @@ import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.data.local.user.UserEntity
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.service.ApiClient
-import com.example.ochataku.service.ApiService
 import com.example.ochataku.service.LoginRequest
 import com.example.ochataku.service.LoginResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,8 +19,6 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
 @HiltViewModel

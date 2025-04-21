@@ -1,14 +1,23 @@
 package com.example.ochataku.viewmodel
 
 import android.content.Context
+import android.media.AudioManager
+import android.media.MediaMetadataRetriever
+import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.message.MessageEntity
 import com.example.ochataku.data.local.user.UserDao
-import com.example.ochataku.service.*
+import com.example.ochataku.service.ApiClient
+import com.example.ochataku.service.ApiService
+import com.example.ochataku.service.MessageDisplay
+import com.example.ochataku.service.MessageResponse
+import com.example.ochataku.service.SendMessageRequest
+import com.example.ochataku.service.UploadResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -294,4 +303,54 @@ class ChatViewModel @Inject constructor(
             Pair("未知用户", null)
         }
     }
+
+    private var mediaPlayer: MediaPlayer? = null
+
+    fun playAudio(context: Context, filePath: String) {
+        try {
+            stopAudio() // 若已有音频在播放，先停止
+
+            mediaPlayer = MediaPlayer().apply {
+                    setDataSource(filePath)
+                setAudioStreamType(AudioManager.STREAM_MUSIC)
+                prepare()
+                start()
+            }
+
+            mediaPlayer?.setOnCompletionListener {
+                it.release()
+                mediaPlayer = null
+                Toast.makeText(context, "播放完成", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "播放失败: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun stopAudio() {
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.stop()
+                it.release()
+            }
+        }
+        mediaPlayer = null
+    }
+
+    fun getAudioDurationSeconds(context: Context, audioUrl: String): Int {
+        return try {
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(audioUrl, HashMap()) // 网络音频
+            val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            retriever.release()
+            (durationStr?.toIntOrNull()?.div(1000)) ?: 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0
+        }
+    }
+
+
 }

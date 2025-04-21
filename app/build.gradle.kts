@@ -96,4 +96,6 @@ dependencies {
 
     implementation("io.socket:socket.io-client:2.1.0")// 注意不兼容 okhttp4，推荐使用这个版本
 
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
+
 }

@@ -1,28 +1,41 @@
 // ✅ 整合导航：MainActivity.kt（无嵌套 NavController）
 package com.example.ochataku.ui
 
+import android.Manifest
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.PhoneIphone
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.ui.theme.ChatAppTheme
-import com.example.ochataku.viewmodel.*
+import com.example.ochataku.viewmodel.LoginViewModel
+import com.example.ochataku.viewmodel.MainViewModel
+import com.example.ochataku.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,6 +43,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val authManager = AuthManager(applicationContext)
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.RECORD_AUDIO),
+            200
+        )
 
         setContent {
             ChatAppTheme {
@@ -108,7 +126,7 @@ class MainActivity : ComponentActivity() {
                                 onConversationClick = { convId, peerId, peerName, isGroup, peerAvatar ->
                                     // 3. 直接用一个路由区分私聊/群聊
                                     val encodedName = Uri.encode(peerName)
-                                    val encodedUrl  = Uri.encode(peerAvatar)
+                                    val encodedUrl = Uri.encode(peerAvatar)
                                     navController.navigate("chat/$convId/$peerId/$encodedName/$isGroup/$encodedUrl")
                                 }
                             )
@@ -130,7 +148,8 @@ class MainActivity : ComponentActivity() {
                             val peerName = backStackEntry.arguments!!.getString("peerName")!!
                             val isGroup = backStackEntry.arguments!!.getBoolean("isGroup")
                             // 解码回原始 URL
-                            val mediaUrlEncoded = backStackEntry.arguments!!.getString("peerAvatar")!!
+                            val mediaUrlEncoded =
+                                backStackEntry.arguments!!.getString("peerAvatar")!!
                             val mediaUrl = Uri.decode(mediaUrlEncoded)
                             val currentUserId = AuthManager(LocalContext.current).getUserId()
                             val currentUserAvatar =
@@ -180,7 +199,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, "Contacts") },
+            icon = { Icon(Icons.Default.PhoneIphone, "Contacts") },
             label = { Text("通讯录") },
             selected = currentRoute == "contacts",
             onClick = {
@@ -192,7 +211,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, "Profile") },
+            icon = { Icon(Icons.Default.Person, "Profile") },
             label = { Text("个人") },
             selected = currentRoute == "profile",
             onClick = {

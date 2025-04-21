@@ -1,10 +1,16 @@
 package com.example.ochataku.data.local
 
-import androidx.room.*;
-import com.example.ochataku.data.local.conversation.*
-import com.example.ochataku.data.local.group.*
-import com.example.ochataku.data.local.message.*
-import com.example.ochataku.data.local.user.*
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.ochataku.data.local.conversation.ConversationDao
+import com.example.ochataku.data.local.conversation.ConversationEntity
+import com.example.ochataku.data.local.group.GroupDao
+import com.example.ochataku.data.local.group.GroupEntity
+import com.example.ochataku.data.local.message.MessageDao
+import com.example.ochataku.data.local.message.MessageEntity
+import com.example.ochataku.data.local.user.UserDao
+import com.example.ochataku.data.local.user.UserEntity
 
 @Database(
     entities = [UserEntity::class, ConversationEntity::class, MessageEntity::class, GroupEntity::class],

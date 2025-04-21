@@ -3,7 +3,9 @@ package com.example.ochataku.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ochataku.data.local.conversation.*
+import com.example.ochataku.data.local.conversation.ConversationDao
+import com.example.ochataku.data.local.conversation.ConversationDisplay
+import com.example.ochataku.data.local.conversation.ConversationEntity
 import com.example.ochataku.service.ApiClient
 import com.example.ochataku.service.ConversationResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
