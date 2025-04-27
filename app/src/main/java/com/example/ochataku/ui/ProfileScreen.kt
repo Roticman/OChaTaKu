@@ -1,272 +1,186 @@
 package com.example.ochataku.ui
 
-//import androidx.compose.foundation.Image
-//import androidx.compose.foundation.background
-//import androidx.compose.foundation.clickable
-//import androidx.compose.foundation.interaction.MutableInteractionSource
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.rememberScrollState
-//import androidx.compose.foundation.shape.CircleShape
-//import androidx.compose.foundation.verticalScroll
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.Edit
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.remember
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.draw.clip
-//import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.graphics.painter.Painter
-//import androidx.compose.ui.layout.ContentScale
-//import androidx.compose.ui.res.painterResource
-//import androidx.compose.ui.res.stringResource
-//import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.text.style.TextOverflow
-//import androidx.compose.ui.tooling.preview.Preview
-//import androidx.compose.ui.unit.dp
-//import androidx.compose.ui.unit.sp
-//import com.example.ochataku.R
-//
-//
-//@Composable
-//fun ProfileScreen(
-//    onProfileClick: () -> Unit = {},
-//    onAccountSecurityClick: () -> Unit = {},
-//    onNotificationClick: () -> Unit = {},
-//    onFileClick: () -> Unit = {},
-//    onFavoritesClick: () -> Unit = {},
-//    onThemeClick: () -> Unit = {},
-//    onLanguageClick: () -> Unit = {},
-//    onSettingsClick: () -> Unit = {}
-//) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .verticalScroll(rememberScrollState())
-//            .navigationBarsPadding()
-//            .background(MaterialTheme.colorScheme.surface)
-//    ) {
-//        // 1. 用户信息头部
-//        ProfileHeader(
-//            avatar = painterResource(id = R.mipmap.avatar_def),
-//            name = "wfc",
-//            account = stringResource(id = R.string.my_chat_account),
-//            onClick = onProfileClick
-//        )
-//
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        // 2. 账号安全选项
-//        OptionItem(
-//            icon = painterResource(id = R.mipmap.ic_account),
-//            title = stringResource(id = R.string.account_security),
-//            onClick = onAccountSecurityClick,
-//            showDivider = false,
-//            modifier = Modifier.padding(top = 16.dp)
-//        )
-//
-//        // 3. 消息通知分组
-//        Column(
-//            modifier = Modifier.padding(top = 16.dp)
-//        ) {
-//            OptionItem(
-//                icon = painterResource(id = R.mipmap.ic_notification),
-//                title = stringResource(id = R.string.message_notification),
-//                onClick = onNotificationClick,
-//                showDivider = false
-//            )
-//        }
-//
-//        // 4. 文件和收藏分组
-//        Column(
-//            modifier = Modifier.padding(top = 16.dp)
-//        ) {
-//            OptionItem(
-//                icon = painterResource(id = R.mipmap.ic_settings_file),
-//                title = stringResource(id = R.string.file),
-//                onClick = onFileClick
-//            )
-//
-//            OptionItem(
-//                icon = painterResource(id = R.mipmap.ic_star),
-//                title = stringResource(id = R.string.favorites),
-//                onClick = onFavoritesClick
-//            )
-//        }
-//
-//        // 5. 主题、语言和设置分组
-//        Column(
-//            modifier = Modifier.padding(top = 16.dp)
-//        ) {
-//            OptionItem(
-//                icon = painterResource(id = R.mipmap.ic_theme),
-//                title = stringResource(id = R.string.theme),
-//                onClick = onThemeClick
-//            )
-//
-//            OptionItem(
-//                icon = painterResource(id = R.mipmap.ic_lang),
-//                title = stringResource(id = R.string.language),
-//                onClick = onLanguageClick
-//            )
-//
-//            OptionItem(
-//                icon = painterResource(id = R.mipmap.ic_setting),
-//                title = stringResource(id = R.string.setting),
-//                onClick = onSettingsClick,
-//                showDivider = false
-//            )
-//        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//    }
-//}
-//
-//@Composable
-//private fun ProfileHeader(
-//    avatar: Painter,
-//    name: String,
-//    account: String,
-//    onClick: () -> Unit,
-//    modifier: Modifier = Modifier
-//) {
-//    Row(
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .height(100.dp)
-//            .clickable(
-//                interactionSource = remember { MutableInteractionSource() },
-//                indication = null,
-//                onClick = onClick
-//            )
-//            .padding(top = 20.dp, end = 3.dp),
-//        verticalAlignment = Alignment.Top
-//    ) {
-//        // 头像
-//        Image(
-//            painter = avatar,
-//            contentDescription = null,
-//            modifier = Modifier
-//                .size(60.dp)
-//                .clip(CircleShape)
-//                .padding(start = 16.dp, end = 16.dp),
-//            contentScale = ContentScale.Crop
-//        )
-//
-//        // 姓名和账号
-//        Column(
-//            modifier = Modifier
-//                .weight(1f)
-//                .height(70.dp),
-//            verticalArrangement = Arrangement.Top
-//        ) {
-//            Text(
-//                text = name,
-//                style = MaterialTheme.typography.titleMedium.copy(
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 15.sp
-//                ),
-//                color = MaterialTheme.colorScheme.onSurface,
-//                maxLines = 1,
-//                overflow = TextOverflow.Ellipsis,
-//                modifier = Modifier
-//                    .padding(top = 15.dp, bottom = 3.dp)
-//            )
-//
-//            Text(
-//                text = account,
-//                style = MaterialTheme.typography.bodyMedium.copy(
-//                    fontSize = 13.sp
-//                ),
-//                color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                maxLines = 1,
-//                overflow = TextOverflow.Ellipsis,
-//                modifier = Modifier.padding(top = 3.dp)
-//            )
-//        }
-//
-//// 右侧箭头
-//        Icon(
-//            painter = painterResource(id = R.mipmap.ic_right),
-//            contentDescription = "更多",
-//            modifier = Modifier
-//                .padding(top = 15.dp, end = 20.dp)
-//                .size(24.dp),
-//            tint = MaterialTheme.colorScheme.onSurfaceVariant
-//        )
-//    }
-//}
-//
-//@Composable
-//private fun OptionItem(
-//    icon: Painter,
-//    title: String,
-//    onClick: () -> Unit,
-//    showDivider: Boolean = true,
-//    modifier: Modifier = Modifier
-//) {
-//    Column(modifier = modifier.fillMaxWidth()) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(56.dp)
-//                .clickable(
-//                    interactionSource = remember { MutableInteractionSource() },
-//                    indication = null,
-//                    onClick = onClick
-//                )
-//                .padding(horizontal = 16.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Icon(
-//                painter = icon,
-//                contentDescription = null,
-//                modifier = Modifier.size(24.dp),
-//                tint = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
-//
-//            Spacer(modifier = Modifier.width(24.dp))
-//
-//            Text(
-//                text = title,
-//                style = MaterialTheme.typography.titleMedium.copy(
-//                    fontWeight = FontWeight.Normal,
-//                    fontSize = 16.sp
-//                ),
-//                modifier = Modifier.weight(1f),
-//                color = MaterialTheme.colorScheme.onSurface
-//            )
-//
-//            Icon(
-//                imageVector = Icons.Default.Edit,
-//                contentDescription = "更多",
-//                tint = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
-//        }
-//
-//        if (showDivider) {
-//            Divider(
-//                modifier = Modifier.padding(start = 72.dp),
-//                thickness = 0.5.dp,
-//                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-//            )
-//        }
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun ProfileScreenPreview() {
-//    MaterialTheme(
-//        colorScheme = lightColorScheme(
-//            surface = Color(0xFFFFFFFF),
-//            surfaceVariant = Color(0xFFF5F5F5),
-//            onSurface = Color(0xFF333333),
-//            onSurfaceVariant = Color(0xFF666666),
-//            outline = Color(0xFFE0E0E0)
-//        )
-//    ) {
-//        ProfileScreen()
-//    }
-//}
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.ochataku.R
+import com.example.ochataku.service.ApiClient.BASE_URL
+import com.example.ochataku.viewmodel.ProfileViewModel
+
+@Composable
+fun ProfileScreen() {
+    val viewModel: ProfileViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .background(Color.White)
+    ) {
+        // 头像区域
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(top = 20.dp, start = 16.dp, end = 16.dp)
+                .clickable { /* TODO: 点击头像区域处理 */ },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("${BASE_URL}${uiState.avatar}")
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Avatar",
+                placeholder = painterResource(R.drawable.default_avatar),
+                error = painterResource(R.drawable.ic_avatar_error),
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = uiState.username, // 这里动态换成用户名
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 3.dp)
+                )
+                Text(
+                    text = uiState.userId.toString(), // 这里动态换成账号
+                    fontSize = 13.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 3.dp)
+                )
+            }
+
+            Image(
+                painter = painterResource(id = R.mipmap.ic_right),
+                contentDescription = "Right Arrow",
+                modifier = Modifier
+                    .padding(top = 15.dp, end = 20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 账户安全
+        OptionItem(
+            iconRes = R.mipmap.ic_account,
+            title = "账号与安全"
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 消息通知
+        OptionItem(
+            iconRes = R.mipmap.ic_notification,
+            title = "消息通知"
+        )
+
+        // 聊天背景 (隐藏，不显示)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 文件、收藏
+        OptionItem(
+            iconRes = R.mipmap.ic_settings_file,
+            title = "文件"
+        )
+        OptionItem(
+            iconRes = R.mipmap.ic_star,
+            title = "收藏"
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 主题、语言、设置
+        OptionItem(
+            iconRes = R.mipmap.ic_theme,
+            title = "主题"
+        )
+        OptionItem(
+            iconRes = R.mipmap.ic_lang,
+            title = "语言"
+        )
+        OptionItem(
+            iconRes = R.mipmap.ic_setting,
+            title = "设置"
+        )
+    }
+}
+
+@Composable
+fun OptionItem(
+    iconRes: Int,
+    title: String,
+    onClick: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(id = iconRes),
+            contentDescription = "Option Icon",
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            color = Color.Black,
+            modifier = Modifier.weight(1f)
+        )
+
+        Image(
+            painter = painterResource(id = R.mipmap.ic_right),
+            contentDescription = "Arrow",
+            modifier = Modifier.size(20.dp)
+        )
+    }
+
+    Divider(thickness = 0.5.dp, color = Color(0xFFE0E0E0))
+}

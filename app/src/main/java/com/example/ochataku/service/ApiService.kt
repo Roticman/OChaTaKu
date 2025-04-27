@@ -1,7 +1,9 @@
 package com.example.ochataku.service
 
 
+import com.example.ochataku.data.local.contact.ContactEntity
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -14,12 +16,46 @@ import retrofit2.http.Path
 
 interface ApiService {
 
+    @GET("/api/user/profile/{id}")
+    suspend fun getProfile(@Path("id") userId: Long): Response<ProfileUiState>
+
+    @GET("/api/contact/{userId}")
+    suspend fun getContacts(@Path("userId") userId: Long): List<ContactEntity>
+
+    // 联系人信息
+    @GET("/api/contact/contact_simple/{id}")
+    suspend fun getContactsById(
+        @Path("id") userId: Long
+    ): Response<ContactSimple>
+
+    @POST("/add_contact")
+    suspend fun addContact(@Body request: AddContactRequest)
+
+    @GET("/friend_requests")
+    suspend fun getFriendRequests(): List<FriendRequest>
+
+    @POST("/handle_friend_request")
+    suspend fun handleFriendRequest(@Body request: HandleFriendRequest)
+
     // 用户头像上传
     @Multipart
     @POST("/api/upload/users/avatar")
     fun uploadAvatar(
         @Part file: MultipartBody.Part
     ): Call<UploadResponse>
+
+    // 群头像上传
+    @Multipart
+    @POST("/api/upload/groups/avatar")
+    fun uploadGroupAvatar(
+        @Part file: MultipartBody.Part
+    ): Call<UploadResponse>
+
+    @POST("/api/group/update_avatar")
+    fun updateGroupAvatar(
+        @Body request: RequestBody
+    ): Call<ResponseBody>
+
 
     // 聊天语音文件上传
     @Multipart

@@ -2,10 +2,17 @@ package com.example.ochataku.service
 
 import com.example.ochataku.data.local.user.UserEntity
 import com.google.gson.annotations.SerializedName
+import java.sql.Timestamp
 
 // 通用数据模型，已从 ApiService 中提取
 
 data class UserSimple(
+    val username: String,
+    val avatar: String
+)
+
+data class ContactSimple(
+    val user_id: Long,
     val username: String,
     val avatar: String
 )
@@ -69,7 +76,7 @@ data class SendMessageRequest(
     val conv_id: Long,
     val is_group: Boolean,
     val content: String,
-    val timestamp: Long,
+    val timestamp: Timestamp,
     val message_type: String = "text",
     val media_url: String? = null
 )
@@ -100,4 +107,34 @@ data class MessageDisplay(
 
 data class UploadResponse(
     val url: String
+)
+
+data class ProfileUiState(
+    @SerializedName("user_id") val userId: Long = 0,
+    val username: String = "",
+    val avatar: String = "",
+    val phone: String = "",
+    val email: String = "",
+    val gender: Int = 0, // 0:保密, 1:男, 2:女
+    val region: String = "",
+    val signature: String = "",
+    val birthDate: String = ""
+)
+
+data class AddContactRequest(
+    val user_id: Long,
+    val peer_id: Long
+)
+
+data class FriendRequest(
+    val id: Int,
+    val fromUserId: String,
+    val toUserId: String,
+    val requestMsg: String,
+    val status: Int // 0=待处理, 1=同意, 2=拒绝
+)
+
+data class HandleFriendRequest(
+    val request_id: Int,
+    val action: String // 'accept' 或 'reject'
 )

@@ -2,8 +2,6 @@
 package com.example.ochataku.ui
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -28,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -38,6 +35,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ochataku.manager.AuthManager
+import com.example.ochataku.ui.chat.ChatScreen
+import com.example.ochataku.ui.contact.ContactScreen
 import com.example.ochataku.ui.theme.ChatAppTheme
 import com.example.ochataku.viewmodel.LoginViewModel
 import com.example.ochataku.viewmodel.MainViewModel
@@ -171,13 +170,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-//                        composable("contacts") {
-//                            // TODO: 联系人界面
-//                        }
+                        composable("contacts") {
+                            ContactScreen()
+                        }
 //
-//                        composable("profile") {
-//                            // TODO: 个人中心界面
-//                        }
+                        composable("profile") {
+                            ProfileScreen()
+                        }
                     }
                 }
             }

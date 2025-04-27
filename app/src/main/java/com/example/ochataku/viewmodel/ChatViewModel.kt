@@ -12,8 +12,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.message.MessageEntity
 import com.example.ochataku.data.local.user.UserDao
-import com.example.ochataku.service.ApiClient
-import com.example.ochataku.service.ApiService
+import com.example.ochataku.repository.MessageRepository
+import com.example.ochataku.repository.UserRepository
 import com.example.ochataku.service.MessageDisplay
 import com.example.ochataku.service.MessageResponse
 import com.example.ochataku.service.SendMessageRequest
@@ -31,11 +31,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+import java.sql.Timestamp
 import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val apiService: ApiService,
+    private val messageRepository: MessageRepository,
+    private val userRepository: UserRepository,
     private val messageDao: MessageDao,
     private val userDao: UserDao
 ) : ViewModel() {
@@ -76,7 +78,7 @@ class ChatViewModel @Inject constructor(
         convId: Long,
         onError: (String) -> Unit = {}
     ) {
-        apiService.getMessagesForConversation(convId)
+        messageRepository.getMessagesForConversation(convId)
             .enqueue(object : Callback<List<MessageResponse>> {
                 override fun onResponse(
                     call: Call<List<MessageResponse>>,
@@ -201,9 +203,9 @@ class ChatViewModel @Inject constructor(
                 "file", file.name, file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
             )
             val uploadCall = when (messageType) {
-                "voice" -> apiService.uploadVoice(part)
-                "video" -> apiService.uploadVideo(part)
-                else -> apiService.uploadImage(part)
+                "voice" -> messageRepository.uploadVoice(part)
+                "video" -> messageRepository.uploadVideo(part)
+                else -> messageRepository.uploadImage(part)
             }
             uploadCall.enqueue(object : Callback<UploadResponse> {
                 override fun onResponse(
@@ -264,11 +266,11 @@ class ChatViewModel @Inject constructor(
             conv_id = convId,
             is_group = isGroup,
             content = content,
-            timestamp = System.currentTimeMillis(),
+            timestamp = Timestamp(System.currentTimeMillis()),
             message_type = messageType,
             media_url = mediaUrl
         )
-        apiService.sendMessage(req).enqueue(object : Callback<ResponseBody> {
+        messageRepository.sendMessage(req).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 onResult(response.isSuccessful)
                 if (response.isSuccessful) {
@@ -292,7 +294,7 @@ class ChatViewModel @Inject constructor(
 
     private suspend fun fetchUserInfo(userId: Long): Pair<String, String?> {
         return try {
-            val response = ApiClient.apiService.getUserById(userId)
+            val response = userRepository.getUserById(userId)
             if (response.isSuccessful) {
                 val user = response.body()
                 Pair(user?.username ?: "用户", user?.avatar)

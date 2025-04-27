@@ -3,11 +3,11 @@ package com.example.ochataku
 import android.content.Context
 import androidx.room.Room
 import com.example.ochataku.data.local.AppDatabase
+import com.example.ochataku.data.local.contact.ContactDao
 import com.example.ochataku.data.local.conversation.ConversationDao
 import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.manager.AuthManager
-import com.example.ochataku.repository.UserRepository
 import com.example.ochataku.service.ApiClient
 import com.example.ochataku.service.ApiService
 import dagger.Module
@@ -35,10 +35,10 @@ object AppModule {
     @Singleton
     fun provideApiService(): ApiService = ApiClient.apiService
 
-    @Provides
-    fun provideUserRepository(): UserRepository {
-        return UserRepository()
-    }
+//    @Provides
+//    fun provideUserRepository(): UserRepository {
+//        return UserRepository()
+//    }
 
     @Provides
     @Singleton
@@ -83,5 +83,10 @@ object AppModule {
     @Provides
     fun provideConversationDao(db: AppDatabase): ConversationDao {
         return db.ConversationDao()
+    }
+
+    @Provides
+    fun provideContactDao(db: AppDatabase): ContactDao {
+        return db.ContactDao()
     }
 }

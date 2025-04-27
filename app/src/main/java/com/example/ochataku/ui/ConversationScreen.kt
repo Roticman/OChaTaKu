@@ -1,14 +1,8 @@
 package com.example.ochataku.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -51,9 +45,12 @@ fun ConversationScreen(
     onConversationClick: (convId: Long, peerId: Long?, peerName: String, isGroup: Boolean, peerAvatar: String) -> Unit
 ) {
     val viewModel: ConversationViewModel = hiltViewModel()
+    val context = LocalContext.current
     val conversations by viewModel.conversations.collectAsState()
     // 收集所有群成员头像列表的 Map<ConvId, List<AvatarUrl>>
     val groupMembersMap by viewModel.groupMembersMap.collectAsState()
+    val groupAvatarMap by viewModel.groupAvatarMap.collectAsState()
+
 
     LaunchedEffect(userId) {
         viewModel.loadConversations(userId)
@@ -75,38 +72,71 @@ fun ConversationScreen(
                 .fillMaxSize()
         ) {
             items(conversations) { convo ->
-                // 如果群聊，提前加载成员数据
-                if (convo.isGroup) {
-                    LaunchedEffect(convo.convId) {
-                        viewModel.loadGroupMembers(convo.convId)
-                    }
-                }
-                val avatars = if (convo.isGroup) {
-                    groupMembersMap[convo.convId] ?: emptyList()
-                } else emptyList()
 
                 ListItem(
                     leadingContent = {
-                        if (convo.isGroup) {
-                            GroupAvatarGrid(
-                                avatarUrls = avatars,
-                                size = 48.dp
-                            )
-                        } else {
-                            val imageUrl = "${BASE_URL}${convo.avatar}"
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(imageUrl)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = "Avatar",
-                                placeholder = painterResource(R.drawable.default_avatar),
-                                error = painterResource(R.drawable.ic_avatar_error),
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                            )
-                        }
+//                        if (convo.isGroup) {
+//                            val url = groupAvatarMap[convo.convId]
+//                                ?: convo.avatar.takeIf { it.isNotBlank() }
+//
+//                            if (!url.isNullOrBlank()) {
+//                                AsyncImage(
+//                                    model = "${BASE_URL}$url",
+//                                    contentDescription = null,
+//                                    placeholder = painterResource(R.drawable.group_default_avatar),
+//                                    modifier = Modifier
+//                                        .size(48.dp)
+//                                        .clip(RoundedCornerShape(8.dp))
+//                                )
+//                            } else {
+//                                val avatars = groupMembersMap[convo.convId]
+//                                if (!avatars.isNullOrEmpty()) {
+//                                    // 成员头像加载到了但没有群头像，触发合成上传
+//                                    LaunchedEffect(convo.convId) {
+//                                        viewModel.mergeAndUploadGroupAvatar(
+//                                            groupId = convo.groupId!!,
+//                                            avatarUrls = avatars
+//                                        )
+//                                    }
+//                                }
+//
+//                                // 还没加载出来时占位图
+//                                AsyncImage(
+//                                    model = painterResource(R.drawable.group_default_avatar),
+//                                    contentDescription = null,
+//                                    modifier = Modifier
+//                                        .size(48.dp)
+//                                        .clip(RoundedCornerShape(8.dp))
+//                                )
+//                            }
+//                        } else {
+//                            val imageUrl = "${BASE_URL}${convo.avatar}"
+//                            AsyncImage(
+//                                model = ImageRequest.Builder(LocalContext.current)
+//                                    .data(imageUrl)
+//                                    .crossfade(true)
+//                                    .build(),
+//                                contentDescription = "Avatar",
+//                                placeholder = painterResource(R.drawable.default_avatar),
+//                                error = painterResource(R.drawable.ic_avatar_error),
+//                                modifier = Modifier
+//                                    .size(48.dp)
+//                                    .clip(RoundedCornerShape(8.dp))
+//                            )
+//                        }
+                        val imageUrl = "${BASE_URL}${convo.avatar}"
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(imageUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Avatar",
+                            placeholder = painterResource(R.drawable.default_avatar),
+                            error = painterResource(R.drawable.ic_avatar_error),
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
                     },
                     headlineContent = {
                         val name = if (convo.isGroup) "[群] ${convo.name}" else convo.name
@@ -142,58 +172,6 @@ fun ConversationScreen(
         }
     }
 }
-
-/**
- * 将最多 9 个头像拼成网格
- */
-@Composable
-fun GroupAvatarGrid(
-    avatarUrls: List<String>,
-    size: androidx.compose.ui.unit.Dp
-) {
-    val urls = avatarUrls.take(9)
-    val count = urls.size
-    val cols = when {
-        count <= 1 -> 1
-        count <= 4 -> 2
-        else -> 3
-    }
-    val rows = (count + cols - 1) / cols
-    val itemSize = size / cols
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(1.dp)
-    ) {
-        for (r in 0 until rows) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(1.dp)
-            ) {
-                for (c in 0 until cols) {
-                    val index = r * cols + c
-                    if (index < count) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data("${BASE_URL}${urls[index]}")
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(itemSize)
-                                .clip(RoundedCornerShape(4.dp))
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(itemSize)
-                                .background(Color.LightGray)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 
 fun formatSmartTime(timestamp: Long): String {

@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.core.ktx)
     implementation(libs.core.ktx)
+    implementation(libs.volley)
     // Compose BOM & 核心
     val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
     implementation(composeBom)
@@ -101,5 +102,10 @@ dependencies {
     implementation("io.socket:socket.io-client:2.1.0")// 注意不兼容 okhttp4，推荐使用这个版本
 
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
+
+    implementation("androidx.compose.ui:ui-graphics:1.5.0") // 用于绘图操作
+
+    implementation("com.belerweb:pinyin4j:2.5.0")
+
 
 }

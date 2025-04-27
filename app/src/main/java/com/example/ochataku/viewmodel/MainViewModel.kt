@@ -2,7 +2,6 @@ package com.example.ochataku.viewmodel
 
 // MainViewModel.kt
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.ochataku.manager.AuthManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +28,6 @@ class MainViewModel @Inject constructor(
     fun refreshLoginStatus() {
         val logged = authManager.isLoggedIn()
         _uiState.value = if (logged) UiState.LoggedIn else UiState.LoggedOut
-        Log.d("refreshLoginStatus", "!!!!!!!!!!!!!!!!!!!")
     }
 
 

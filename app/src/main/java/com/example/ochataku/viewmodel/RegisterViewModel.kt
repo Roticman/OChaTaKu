@@ -3,8 +3,7 @@ package com.example.ochataku.viewmodel
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.example.ochataku.data.local.user.UserDao
-import com.example.ochataku.service.ApiClient
+import com.example.ochataku.repository.UserRepository
 import com.example.ochataku.service.RegisterRequest
 import com.example.ochataku.service.RegisterResponse
 import com.example.ochataku.service.UploadResponse
@@ -22,13 +21,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val userDao: UserDao  // 由 Hilt 自动注入
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _registerSuccess = MutableStateFlow<Boolean?>(null)
     val registerSuccess: StateFlow<Boolean?> = _registerSuccess
-
-    private val apiService = ApiClient.apiService
 
 
     fun registerUser(
@@ -43,7 +40,7 @@ class RegisterViewModel @Inject constructor(
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
             val avatarPart = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-            apiService.uploadAvatar(avatarPart)
+            userRepository.uploadAvatar(avatarPart)
                 .enqueue(object : Callback<UploadResponse> {
                     override fun onResponse(
                         call: Call<UploadResponse>,
@@ -75,7 +72,7 @@ class RegisterViewModel @Inject constructor(
 //        }
 //
 //        // 向后端发送注册请求
-//        apiService.registerUserWithAvatar(
+//        userRepository.registerUserWithAvatar(
 //            username = usernameBody,
 //            password = passwordBody,
 //            avatar = avatarPart,
@@ -111,7 +108,7 @@ class RegisterViewModel @Inject constructor(
             password = password,
             avatarUri = avatarUrl
         )
-        apiService.registerUser(request)
+        userRepository.registerUser(request)
             .enqueue(object : Callback<RegisterResponse> {
                 override fun onResponse(
                     call: Call<RegisterResponse>,

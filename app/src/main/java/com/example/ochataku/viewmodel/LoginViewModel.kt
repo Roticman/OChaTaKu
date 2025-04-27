@@ -4,10 +4,9 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.data.local.user.UserEntity
 import com.example.ochataku.manager.AuthManager
-import com.example.ochataku.service.ApiClient
+import com.example.ochataku.repository.UserRepository
 import com.example.ochataku.service.LoginRequest
 import com.example.ochataku.service.LoginResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,20 +22,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val userDao: UserDao,
+    private val userRepository: UserRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState
 
-    private val apiService = ApiClient.apiService
-
     private val authManager = AuthManager(context)
 
     fun login(username: String, password: String) {
         val request = LoginRequest(username, password)
-        apiService.loginUser(request).enqueue(object : Callback<LoginResponse> {
+        userRepository.loginUser(request).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful && response.body()?.user != null) {
                     val user = response.body()!!.user

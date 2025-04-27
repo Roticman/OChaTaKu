@@ -3,6 +3,8 @@ package com.example.ochataku.data.local
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.ochataku.data.local.contact.ContactDao
+import com.example.ochataku.data.local.contact.ContactEntity
 import com.example.ochataku.data.local.conversation.ConversationDao
 import com.example.ochataku.data.local.conversation.ConversationEntity
 import com.example.ochataku.data.local.group.GroupDao
@@ -13,7 +15,7 @@ import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.data.local.user.UserEntity
 
 @Database(
-    entities = [UserEntity::class, ConversationEntity::class, MessageEntity::class, GroupEntity::class],
+    entities = [UserEntity::class, ConversationEntity::class, MessageEntity::class, GroupEntity::class, ContactEntity::class],
     version = 1,
     exportSchema = false
 )
@@ -21,6 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun MessageDao(): MessageDao
     abstract fun groupDao(): GroupDao
+    abstract fun ContactDao(): ContactDao
 
     //    abstract fun groupMemberDao(): GroupMemberDao
 //    abstract fun friendDao(): FriendDao
