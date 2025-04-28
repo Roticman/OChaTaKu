@@ -1,15 +1,23 @@
 package com.example.ochataku.repository
 
+import com.example.ochataku.manager.AuthManager
+import com.example.ochataku.service.ApiService
+import com.example.ochataku.service.FriendRequest
+import com.example.ochataku.service.HandleFriendRequest
+import javax.inject.Inject
 
-import com.example.ochataku.api.ApiService
-import com.example.ochataku.model.FriendRequest
-
-class FriendRequestRepository(private val apiService: ApiService) {
+class FriendRequestRepository @Inject constructor(
+    private val apiService: ApiService,
+    private val authManager: AuthManager
+) {
     suspend fun getFriendRequests(): List<FriendRequest> {
-        return apiService.getFriendRequests()
+        return apiService.getFriendRequests(
+            to_user_id = authManager.getUserId()
+        )
     }
 
     suspend fun handleFriendRequest(requestId: Int, action: String) {
-        apiService.handleFriendRequest(requestId, action)
+        val request = HandleFriendRequest(requestId, action)
+        apiService.handleFriendRequest(request)
     }
 }

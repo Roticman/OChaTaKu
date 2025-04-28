@@ -28,13 +28,13 @@ interface ApiService {
         @Path("id") userId: Long
     ): Response<ContactSimple>
 
-    @POST("/add_contact")
+    @POST("/api/contact/add_contact")
     suspend fun addContact(@Body request: AddContactRequest)
 
-    @GET("/friend_requests")
-    suspend fun getFriendRequests(): List<FriendRequest>
+    @GET("/api/contact/friend_requests/{id}")
+    suspend fun getFriendRequests(@Path("id") to_user_id: Long): List<FriendRequest>
 
-    @POST("/handle_friend_request")
+    @POST("/api/contact/handle_request")
     suspend fun handleFriendRequest(@Body request: HandleFriendRequest)
 
     // 用户头像上传

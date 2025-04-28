@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ochataku.R
@@ -35,6 +36,7 @@ import com.example.ochataku.viewmodel.ContactViewModel
 
 @Composable
 fun ContactList(
+    navController: NavController,
     viewModel: ContactViewModel,
     contacts: List<ContactEntity>,
     userMap: Map<Long, ContactSimple>,
@@ -60,7 +62,7 @@ fun ContactList(
         modifier = modifier.fillMaxSize()
     ) {
         item {
-            ContactStaticItem(title = "新的朋友")
+            ContactStaticItem(title = "新的朋友", onClick = {navController.navigate("friend_request")})
             itemIndex++
         }
         item {
@@ -91,11 +93,14 @@ fun ContactList(
 }
 
 @Composable
-fun ContactStaticItem(title: String) {
+fun ContactStaticItem(title: String, onClick: (() -> Unit)? = null) {
     Text(
         text = title,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(enabled = onClick != null) {
+                onClick?.invoke()
+            }
             .padding(16.dp),
         style = MaterialTheme.typography.titleMedium
     )

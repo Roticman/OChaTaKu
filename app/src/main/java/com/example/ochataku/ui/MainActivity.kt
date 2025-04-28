@@ -37,6 +37,7 @@ import androidx.navigation.navArgument
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.ui.chat.ChatScreen
 import com.example.ochataku.ui.contact.ContactScreen
+import com.example.ochataku.ui.contact.FriendRequestScreen
 import com.example.ochataku.ui.theme.ChatAppTheme
 import com.example.ochataku.viewmodel.LoginViewModel
 import com.example.ochataku.viewmodel.MainViewModel
@@ -171,11 +172,17 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("contacts") {
-                            ContactScreen()
+                            ContactScreen(
+                                navController = navController
+                            )
                         }
 //
                         composable("profile") {
                             ProfileScreen()
+                        }
+
+                        composable("friend_request") {
+                            FriendRequestScreen()
                         }
                     }
                 }
