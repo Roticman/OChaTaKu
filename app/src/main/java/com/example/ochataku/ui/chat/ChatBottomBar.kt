@@ -1,5 +1,6 @@
 package com.example.ochataku.ui.chat
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import com.example.ochataku.service.MessageDisplay
+import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.ChatViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -159,29 +161,42 @@ fun ChatInputBar(
             confirmButton = {},
             text = {
                 Column {
+                    val activity = context as? Activity
                     TextButton(onClick = {
                         isDialogOpen = false
-                        mediaPickerLauncher.launch("*/*")
+                        activity?.let {
+                            PermissionUtils.requestMediaPermission(it) {
+                                mediaPickerLauncher.launch("*/*")
+                            }
+                        }
                     }) { Text("从相册选择") }
 
                     TextButton(onClick = {
                         isDialogOpen = false
-                        imageCaptureLauncher.launch(null)
+                        activity?.let {
+                            PermissionUtils.requestCameraPermission(it) {
+                                imageCaptureLauncher.launch(null)
+                            }
+                        }
                     }) { Text("拍照") }
 
                     TextButton(onClick = {
                         isDialogOpen = false
-                        val vf = File(
-                            context.cacheDir,
-                            "recorded_video_${System.currentTimeMillis()}.mp4"
-                        )
-                        val uri = FileProvider.getUriForFile(
-                            context,
-                            "${context.packageName}.provider",
-                            vf
-                        )
-                        onMediaUriSelected(uri)
-                        videoCaptureLauncher.launch(uri)
+                        activity?.let {
+                            PermissionUtils.requestCameraPermission(it) {
+                                val vf = File(
+                                    context.cacheDir,
+                                    "recorded_video_${System.currentTimeMillis()}.mp4"
+                                )
+                                val uri = FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.provider",
+                                    vf
+                                )
+                                onMediaUriSelected(uri)
+                                videoCaptureLauncher.launch(uri)
+                            }
+                        }
                     }) { Text("拍视频") }
                 }
             }

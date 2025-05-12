@@ -266,7 +266,7 @@ class ChatViewModel @Inject constructor(
             conv_id = convId,
             is_group = isGroup,
             content = content,
-            timestamp = Timestamp(System.currentTimeMillis()),
+            timestamp = System.currentTimeMillis(),
             message_type = messageType,
             media_url = mediaUrl
         )

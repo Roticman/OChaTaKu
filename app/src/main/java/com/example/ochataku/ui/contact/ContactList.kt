@@ -29,7 +29,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ochataku.R
 import com.example.ochataku.data.local.contact.ContactEntity
-import com.example.ochataku.model.getFirstLetter
+import com.example.ochataku.utils.getFirstLetter
 import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.service.ContactSimple
 import com.example.ochataku.viewmodel.ContactViewModel

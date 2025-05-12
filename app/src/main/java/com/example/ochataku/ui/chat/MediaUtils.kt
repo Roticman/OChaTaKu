@@ -58,7 +58,8 @@ fun getVideoThumbnailBitmap(context: Context, videoUrl: String): Bitmap? {
 }
 
 fun parseMessage(json: JSONObject): MessageDisplay {
-    val rowGroup = json.getBoolean("is_group")
+    val isGroup = json.optInt("is_group", 0) == 1
+
     return MessageDisplay(
         conv_id = json.getLong("conv_id"),
         sender_id = json.getLong("sender_id"),
@@ -66,7 +67,7 @@ fun parseMessage(json: JSONObject): MessageDisplay {
         sender_avatar = json.getString("sender_avatar"),
         content = json.getString("content"),
         timestamp = json.getLong("timestamp"),
-        is_group = if (rowGroup) 1 else 0,
+        is_group = if (isGroup) 1 else 0,
         message_type = json.getString("message_type"),
         media_url = if (json.has("media_url") && !json.isNull("media_url")) json.getString("media_url") else null,
     )

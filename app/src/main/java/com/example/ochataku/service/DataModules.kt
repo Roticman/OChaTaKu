@@ -76,7 +76,7 @@ data class SendMessageRequest(
     val conv_id: Long,
     val is_group: Boolean,
     val content: String,
-    val timestamp: Timestamp,
+    val timestamp: Long,
     val message_type: String = "text",
     val media_url: String? = null
 )

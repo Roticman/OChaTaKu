@@ -1,7 +1,7 @@
-package com.example.ochataku.model
+package com.example.ochataku.utils
 
-import com.example.ochataku.model.PinyinUtil.getPinyinFirstLetter
-import com.example.ochataku.model.PinyinUtil.isChinese
+import com.example.ochataku.utils.PinyinUtil.getPinyinFirstLetter
+import com.example.ochataku.utils.PinyinUtil.isChinese
 
 fun getFirstLetter(name: String): String {
     if (name.isEmpty()) return "#"

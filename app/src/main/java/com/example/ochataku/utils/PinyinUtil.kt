@@ -1,4 +1,4 @@
-package com.example.ochataku.model
+package com.example.ochataku.utils
 
 import net.sourceforge.pinyin4j.PinyinHelper
 

@@ -1,10 +1,7 @@
 // ✅ 整合导航：MainActivity.kt（无嵌套 NavController）
 package com.example.ochataku.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,8 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -39,6 +34,7 @@ import com.example.ochataku.ui.chat.ChatScreen
 import com.example.ochataku.ui.contact.ContactScreen
 import com.example.ochataku.ui.contact.FriendRequestScreen
 import com.example.ochataku.ui.theme.ChatAppTheme
+import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.LoginViewModel
 import com.example.ochataku.viewmodel.MainViewModel
 import com.example.ochataku.viewmodel.RegisterViewModel
@@ -49,8 +45,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val authManager = AuthManager(applicationContext)
-        requestAllRequiredPermissions()
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
 
 
         setContent {
@@ -190,30 +184,31 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun requestAllRequiredPermissions() {
-        val permissions = mutableListOf<String>()
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        permissions.add(Manifest.permission.RECORD_AUDIO)
-        permissions.add(Manifest.permission.CAMERA)
+        PermissionUtils.handlePermissionResult(this, requestCode, grantResults) {
+            when (requestCode) {
+                PermissionUtils.REQUEST_CODE_CAMERA -> {
+                    // 相机权限已授权，可以执行拍照逻辑
+                }
 
-        if (Build.VERSION.SDK_INT >= 33) {
-            permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
-            permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
-        } else {
-            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-            if (Build.VERSION.SDK_INT <= 28) {
-                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                PermissionUtils.REQUEST_CODE_AUDIO -> {
+                    // 录音权限已授权
+                }
+
+                PermissionUtils.REQUEST_CODE_MEDIA -> {
+                    // 相册权限已授权
+                }
             }
         }
-
-        val permissionsToRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-
-        if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 100)
-        }
     }
+
 
 }
 
