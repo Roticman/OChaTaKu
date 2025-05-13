@@ -138,3 +138,13 @@ data class HandleFriendRequest(
     val request_id: Int,
     val action: String // 'accept' 或 'reject'
 )
+
+data class ContactRequest(
+    val userId: Long,
+    val peerId: Long,
+    val isGroup: Boolean
+)
+
+data class ContactConvResponse(
+    val convId: Long
+)

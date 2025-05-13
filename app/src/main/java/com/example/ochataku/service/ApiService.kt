@@ -89,6 +89,9 @@ interface ApiService {
         @Body request: LoginRequest
     ): Call<LoginResponse>
 
+    @POST("/api/conversation/get_or_create")
+    suspend fun getOrCreateConversation(@Body request: ContactRequest): ContactConvResponse
+
     // 会话管理
     @POST("/api/conversation/add")
     suspend fun addConversation(

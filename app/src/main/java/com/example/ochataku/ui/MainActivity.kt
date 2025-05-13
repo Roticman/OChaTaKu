@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.ui.chat.ChatScreen
+import com.example.ochataku.ui.contact.ContactProfileScreen
 import com.example.ochataku.ui.contact.ContactScreen
 import com.example.ochataku.ui.contact.FriendRequestScreen
 import com.example.ochataku.ui.theme.ChatAppTheme
@@ -130,7 +131,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-
                         composable(
                             route = "chat/{convId}/{peerId}/{peerName}/{isGroup}/{peerAvatar}",
                             arguments = listOf(
@@ -170,7 +170,15 @@ class MainActivity : ComponentActivity() {
                                 navController = navController
                             )
                         }
-//
+
+                        composable("contact_profile/{userId}") { backStackEntry ->
+                            val userId = backStackEntry.arguments?.getString("userId")?.toLongOrNull()
+                            userId?.let {
+                                ContactProfileScreen(navController = navController, userId = it)
+                            }
+                        }
+
+
                         composable("profile") {
                             ProfileScreen()
                         }

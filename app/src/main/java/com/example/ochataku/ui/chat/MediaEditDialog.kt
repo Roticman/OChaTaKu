@@ -1,6 +1,7 @@
 package com.example.ochataku.ui.chat
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,13 +19,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 
 @Composable
@@ -38,6 +46,13 @@ fun MediaEditDialog(
     onSend: () -> Unit
 ) {
     if (showDialog && selectedMediaUri != null) {
+        val context = LocalContext.current
+        val contentResolver = context.contentResolver
+        val mimeType = contentResolver.getType(selectedMediaUri)
+        Log.d("mimetype", "Uri: $selectedMediaUri")
+        Log.d("mimetype", "Type: $mimeType")
+
+
         Dialog(onDismissRequest = onDismiss) {
             Surface(
                 color = Color.Black,
@@ -50,15 +65,28 @@ fun MediaEditDialog(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    // 图片预览
-                    AsyncImage(
-                        model = selectedMediaUri,
-                        contentDescription = "预览",
-                        modifier = Modifier
-                            .size(250.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
+                    val isVideo = mimeType?.contains("video") == true
+                    val isImage = selectedMediaUri.toString().contains("image")
+
+                    when {
+                        isImage -> {
+                            AsyncImage(
+                                model = selectedMediaUri,
+                                contentDescription = "图片预览",
+                                modifier = Modifier
+                                    .size(250.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        isVideo -> {
+                            VideoPlayer(uri = selectedMediaUri)
+                        }
+                        else -> {
+                            Text("无法预览该媒体类型", color = Color.White)
+                        }
+                    }
+
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -99,3 +127,34 @@ fun MediaEditDialog(
         }
     }
 }
+
+@Composable
+fun VideoPlayer(uri: Uri) {
+    val context = LocalContext.current
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(uri))
+            prepare()
+            playWhenReady = false
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    AndroidView(
+        factory = {
+            PlayerView(it).apply {
+                player = exoPlayer
+                useController = true
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)
+    )
+}
+

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -270,11 +271,12 @@ fun ChatScreen(
                 val contentResolver = context.contentResolver
                 val type =
                     contentResolver.getType(selectedMediaUri!!) // MIME类型，比如 "image/jpeg"、"video/mp4"
+                type?.let { Log.d("type", it) }
 
                 val messageType = when {
-                    type?.startsWith("image") == true -> "image"
-                    type?.startsWith("video") == true -> "video"
-                    type?.startsWith("audio") == true -> "voice"
+                    type?.contains("image") == true || selectedMediaUri.toString().contains("image") -> "image"
+                    type?.contains("video") == true -> "video"
+                    type?.contains("audio") == true -> "voice"
                     else -> "file" // 其他归为文件
                 }
 

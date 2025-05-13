@@ -107,5 +107,8 @@ dependencies {
 
     implementation("com.belerweb:pinyin4j:2.5.0")
 
+    implementation("androidx.media3:media3-exoplayer:1.6.1")
+    implementation("androidx.media3:media3-ui:1.6.1")
+    implementation("androidx.media3:media3-common:1.6.1")
 
 }

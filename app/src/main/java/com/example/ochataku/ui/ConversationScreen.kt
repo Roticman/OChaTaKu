@@ -45,7 +45,7 @@ fun ConversationScreen(
     onConversationClick: (convId: Long, peerId: Long?, peerName: String, isGroup: Boolean, peerAvatar: String) -> Unit
 ) {
     val viewModel: ConversationViewModel = hiltViewModel()
-    val context = LocalContext.current
+
     val conversations by viewModel.conversations.collectAsState()
     // 收集所有群成员头像列表的 Map<ConvId, List<AvatarUrl>>
     val groupMembersMap by viewModel.groupMembersMap.collectAsState()

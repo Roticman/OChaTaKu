@@ -29,9 +29,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ochataku.R
 import com.example.ochataku.data.local.contact.ContactEntity
-import com.example.ochataku.utils.getFirstLetter
 import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.service.ContactSimple
+import com.example.ochataku.utils.getFirstLetter
 import com.example.ochataku.viewmodel.ContactViewModel
 
 @Composable
@@ -62,7 +62,9 @@ fun ContactList(
         modifier = modifier.fillMaxSize()
     ) {
         item {
-            ContactStaticItem(title = "新的朋友", onClick = {navController.navigate("friend_request")})
+            ContactStaticItem(
+                title = "新的朋友",
+                onClick = { navController.navigate("friend_request") })
             itemIndex++
         }
         item {
@@ -80,7 +82,12 @@ fun ContactList(
 
             items(contactsInGroup) { (displayName, contact) ->
                 val user = userMap.values.find { user -> user.user_id == contact.peerId }
-                ContactItem(contact = contact, username = user?.username, avatarUrl = user?.avatar)
+                ContactItem(
+                    navController = navController,
+                    contact = contact,
+                    username = user?.username,
+                    avatarUrl = user?.avatar
+                )
                 itemIndex++
             }
         }
@@ -119,12 +126,21 @@ fun GroupTitle(letter: String) {
 }
 
 @Composable
-fun ContactItem(contact: ContactEntity, username: String?, avatarUrl: String?) {
+fun ContactItem(
+    navController: NavController,
+    contact: ContactEntity,
+    username: String?,
+    avatarUrl: String?
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* 点击联系人，后续可处理 */ }
+            .clickable {
+                contact.peerId.let {
+                    navController.navigate("contact_profile/${it}")
+                }
+            }
             .padding(12.dp)
     ) {
         AsyncImage(
