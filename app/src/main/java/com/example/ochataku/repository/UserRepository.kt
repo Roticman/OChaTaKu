@@ -1,15 +1,18 @@
 package com.example.ochataku.repository
 
 
+import android.util.Log
 import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.service.ApiService
+import com.example.ochataku.service.FriendRequestPayload
 import com.example.ochataku.service.LoginRequest
 import com.example.ochataku.service.LoginResponse
 import com.example.ochataku.service.ProfileUiState
 import com.example.ochataku.service.RegisterRequest
 import com.example.ochataku.service.RegisterResponse
 import com.example.ochataku.service.UploadResponse
+import com.example.ochataku.service.UserSearchResult
 import com.example.ochataku.service.UserSimple
 import okhttp3.MultipartBody
 import retrofit2.Call
@@ -23,6 +26,33 @@ class UserRepository @Inject constructor(
     private val authManager: AuthManager,
     private val userDao: UserDao
 ) {
+
+    suspend fun searchUsers(query: String): List<UserSearchResult> {
+        if (query.isBlank()) return emptyList()
+
+        return try {
+            val results = apiService.searchUsers(mapOf("query" to query))
+
+            Log.d("UserRepository", "✅ 搜索成功, 返回 ${results.size} 条记录")
+            results
+        } catch (e: retrofit2.HttpException) {
+            Log.e("UserRepository", "❌ HTTP 错误: ${e.code()} ${e.message()}")
+            emptyList()
+        } catch (e: Exception) {
+            Log.e("UserRepository", "❌ 搜索失败: ${e.localizedMessage}")
+            emptyList()
+        }
+    }
+
+    suspend fun sendFriendRequest(toUserId: Long) {
+        val fromUserId = authManager.getUserId()
+        val payload = FriendRequestPayload(
+            from_user_id = fromUserId,
+            to_user_id = toUserId
+        )
+        apiService.sendFriendRequest(payload)
+    }
+
     /** 登录 */
     fun loginUser(request: LoginRequest): Call<LoginResponse> =
         apiService.loginUser(request)

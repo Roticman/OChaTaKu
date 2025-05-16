@@ -99,7 +99,7 @@ fun ContactScreen(navController: NavController,) {
 }
 
 fun onAddContact(navController: NavController) {
-    navController.navigate("friend_request")
+    navController.navigate("add_friend")
 }
 
 

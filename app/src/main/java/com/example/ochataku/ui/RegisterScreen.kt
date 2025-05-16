@@ -168,13 +168,10 @@ fun validateInputsWithMessages(
         username.length > 20 -> errors["username"] = "用户名不能超过20个字符"
         !username.matches(Regex("^[a-zA-Z0-9_]+$")) ->
             errors["username"] = "只能包含字母、数字和下划线"
-    }
 
-//    when {
-//        email.isBlank() -> errors["email"] = "邮箱不能为空"
-//        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
-//            errors["email"] = "请输入有效的邮箱地址"
-//    }
+        username.matches(Regex("^\\d+$")) -> // 👈 新增这一行
+            errors["username"] = "用户名不能全为数字"
+    }
 
     when {
         password.isBlank() -> errors["password"] = "密码不能为空"

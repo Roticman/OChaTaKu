@@ -59,9 +59,6 @@ class ContactViewModel @Inject constructor(
             // 6. 更新 StateFlow
             _contacts.value = sortedContacts
 
-            Log.d("ContactViewModel", "Processed Contact List: $sortedContacts")
-
-
             // 7. 同时更新 userMap（可选，如果你的界面用得到）
             val sortedUserMap = users.associateBy { it.user_id }
             _userMap.value = sortedUserMap

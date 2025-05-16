@@ -189,6 +189,7 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             ChatTopBar(
+                peerId = peerId,
                 peerName = peerName,
                 isGroup = isGroup,
                 convId = convId,
@@ -228,7 +229,8 @@ fun ChatScreen(
             peerAvatarUrl = peerAvatarUrl,
             isGroup = isGroup,
             context = context,
-            viewModel = viewModel
+            viewModel = viewModel,
+            navController = navController
         )
 
         if (showNewMessageHint) {
@@ -271,7 +273,6 @@ fun ChatScreen(
                 val contentResolver = context.contentResolver
                 val type =
                     contentResolver.getType(selectedMediaUri!!) // MIME类型，比如 "image/jpeg"、"video/mp4"
-                type?.let { Log.d("type", it) }
 
                 val messageType = when {
                     type?.contains("image") == true || selectedMediaUri.toString().contains("image") -> "image"

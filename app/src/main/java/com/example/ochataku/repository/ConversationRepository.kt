@@ -1,13 +1,19 @@
 package com.example.ochataku.repository
 
+import android.util.Log
 import com.example.ochataku.data.local.conversation.ConversationDao
 import com.example.ochataku.data.local.conversation.ConversationDisplay
+import com.example.ochataku.data.local.conversation.ConversationEntity
 import com.example.ochataku.service.ApiService
+import com.example.ochataku.service.ContactConvResponse
+import com.example.ochataku.service.ContactRequest
 import com.example.ochataku.service.ConversationRequest
 import com.example.ochataku.service.ConversationResponse
 import com.example.ochataku.service.GroupMember
 import com.example.ochataku.service.GroupSimple
 import com.example.ochataku.service.UploadResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -21,6 +27,124 @@ class ConversationRepository @Inject constructor(
     private val apiService: ApiService,
     private val conversationDao: ConversationDao
 ) {
+    suspend fun fetchAndCacheConversations(userId: Long): List<ConversationDisplay> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val response = apiService.getConversationsAsync(userId).execute()
+                if (response.isSuccessful && response.body() != null) {
+                    val conversations = response.body()!!
+
+                    conversationDao.clearConversationsForUser(userId)
+
+                    val localEntities = conversations.map {
+                        ConversationEntity(
+                            convId = it.convId,
+                            aId = it.aId,
+                            bId = it.bId,
+                            groupId = it.groupId,
+                            isGroup = it.isGroup,
+                            lastMessage = it.lastMessage ?: "",
+                            timestamp = it.timestamp
+                        )
+                    }
+
+                    conversationDao.insertAll(localEntities)
+                }
+
+                // 从 Room 中读取基础数据，再逐条补全 name 和 avatar
+                val baseList = conversationDao.getConversationsForUser(userId)
+
+                baseList.map { convo ->
+                    val targetId = if (convo.isGroup) convo.groupId!! else {
+                        if (convo.aId == userId) convo.bId!! else convo.aId!!
+                    }
+
+                    val (name, avatar) = getNameAndAvatar(targetId, convo.isGroup)
+
+                    ConversationDisplay(
+                        convId = convo.convId,
+                        aId = convo.aId,
+                        bId = convo.bId,
+                        groupId = convo.groupId,
+                        isGroup = convo.isGroup,
+                        name = name,
+                        avatar = avatar ?: "",
+                        lastMessage = convo.lastMessage,
+                        timestamp = convo.timestamp
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+
+            // fallback 到 Room 原有数据并补充名称与头像
+            val baseList = conversationDao.getConversationsForUser(userId)
+
+            baseList.map { convo ->
+                val targetId = if (convo.isGroup) convo.groupId!! else {
+                    if (convo.aId == userId) convo.bId!! else convo.aId!!
+                }
+
+                val (name, avatar) = getNameAndAvatar(targetId, convo.isGroup)
+
+                ConversationDisplay(
+                    convId = convo.convId,
+                    aId = convo.aId,
+                    bId = convo.bId,
+                    groupId = convo.groupId,
+                    isGroup = convo.isGroup,
+                    name = name,
+                    avatar = avatar ?: "",
+                    lastMessage = convo.lastMessage,
+                    timestamp = convo.timestamp
+                )
+            }
+        }
+    }
+
+    suspend fun getOrCreateConversation(request: ContactRequest): ContactConvResponse {
+        return apiService.getOrCreateConversation(request)
+    }
+
+
+    /** 根据 isGroup 判断是私聊还是群聊，获取名称与头像 */
+    private suspend fun getNameAndAvatar(id: Long, isGroup: Boolean): Pair<String, String?> {
+        return if (isGroup) {
+            getGroupNameAndAvatar(id)
+        } else {
+            getUserNameAndAvatar(id)
+        }
+    }
+
+    private suspend fun getUserNameAndAvatar(userId: Long): Pair<String, String?> {
+        return try {
+            val response = apiService.getUserById(userId)
+            if (response.isSuccessful) {
+                val user = response.body()
+                Pair(user?.username ?: "用户", user?.avatar)
+            } else {
+                Pair("未知用户", null)
+            }
+        } catch (e: Exception) {
+            Pair("未知用户", null)
+        }
+    }
+
+    private suspend fun getGroupNameAndAvatar(groupId: Long): Pair<String, String?> {
+        return try {
+            val response = apiService.getGroupById(groupId)
+            if (response.isSuccessful) {
+                val group = response.body()
+                Pair(group?.group_name ?: "群聊", group?.avatar)
+            } else {
+                Pair("群聊", null)
+            }
+        } catch (e: Exception) {
+            Pair("群聊", null)
+        }
+    }
+
     /** 获取会话列表（异步调用） */
     fun getConversations(userId: Long): Call<List<ConversationResponse>> =
         apiService.getConversationsAsync(userId)

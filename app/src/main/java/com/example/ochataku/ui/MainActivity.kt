@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -31,9 +32,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.ui.chat.ChatScreen
+import com.example.ochataku.ui.contact.AddFriendScreen
 import com.example.ochataku.ui.contact.ContactProfileScreen
 import com.example.ochataku.ui.contact.ContactScreen
 import com.example.ochataku.ui.contact.FriendRequestScreen
+import com.example.ochataku.ui.contact.GroupListScreen
 import com.example.ochataku.ui.theme.ChatAppTheme
 import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.LoginViewModel
@@ -58,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(uiState) {
                     when (uiState) {
                         is MainViewModel.UiState.Loading -> {
-                            navController.navigate("loading") { popUpTo(0) }
+                            navController.navigate("loading") { popUpTo(0) { inclusive = true } }
                         }
 
                         is MainViewModel.UiState.LoggedIn -> {
@@ -79,6 +82,7 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
                 val showBottomBar = currentRoute in bottomRoutes
+                val currentUserId = authManager.getUserId()
 
 
                 Scaffold(
@@ -172,7 +176,8 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("contact_profile/{userId}") { backStackEntry ->
-                            val userId = backStackEntry.arguments?.getString("userId")?.toLongOrNull()
+                            val userId =
+                                backStackEntry.arguments?.getString("userId")?.toLongOrNull()
                             userId?.let {
                                 ContactProfileScreen(navController = navController, userId = it)
                             }
@@ -185,6 +190,20 @@ class MainActivity : ComponentActivity() {
 
                         composable("friend_request") {
                             FriendRequestScreen()
+                        }
+
+                        composable("add_friend") {
+                            AddFriendScreen(
+                                navController = navController,
+                                currentUserId = currentUserId
+                            )
+                        }
+
+                        composable("group_list") {
+                            GroupListScreen(
+                                userId = currentUserId,
+                                navController = navController
+                            )
                         }
                     }
                 }
@@ -233,6 +252,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
                 if (currentRoute != "conversation") {
                     navController.navigate("conversation") {
                         launchSingleTop = true
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             }
@@ -245,6 +265,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
                 if (currentRoute != "contacts") {
                     navController.navigate("contacts") {
                         launchSingleTop = true
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             }
@@ -257,6 +278,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
                 if (currentRoute != "profile") {
                     navController.navigate("profile") {
                         launchSingleTop = true
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             }

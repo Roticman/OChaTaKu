@@ -68,7 +68,9 @@ fun ContactList(
             itemIndex++
         }
         item {
-            ContactStaticItem(title = "群聊")
+            ContactStaticItem(
+                title = "群聊",
+                onClick = { navController.navigate("group_list") })
             itemIndex++
         }
 

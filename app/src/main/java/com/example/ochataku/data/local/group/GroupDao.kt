@@ -14,8 +14,8 @@ interface GroupDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGroups(groups: List<GroupEntity>)
 
-    @Query("SELECT * FROM `group` WHERE group_id = :groupId LIMIT 1")
-    suspend fun getGroupById(groupId: Long): GroupEntity?
+    @Query("SELECT * FROM `group`")
+    suspend fun getGroups(): List<GroupEntity>?
 
     @Query("DELETE FROM `group`")
     suspend fun clearAllGroups()

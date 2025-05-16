@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.ochataku.data.local.AppDatabase
 import com.example.ochataku.data.local.contact.ContactDao
 import com.example.ochataku.data.local.conversation.ConversationDao
+import com.example.ochataku.data.local.group.GroupDao
 import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.user.UserDao
 import com.example.ochataku.manager.AuthManager
@@ -53,10 +54,10 @@ object AppModule {
     }
 
 
-    //    @Provides
-//    fun provideGroupDao(db: AppDatabase): GroupDao {
-//        return db.groupDao()
-//    }
+    @Provides
+    fun provideGroupDao(db: AppDatabase): GroupDao {
+        return db.groupDao()
+    }
 //
 //    @Provides
 //    fun provideGroupMemberDao(db: AppDatabase): GroupMemberDao {

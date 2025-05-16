@@ -85,7 +85,6 @@ class ChatViewModel @Inject constructor(
                     response: Response<List<MessageResponse>>
                 ) {
                     if (response.isSuccessful && response.body() != null) {
-                        Log.d("ChatViewModelDebug", "获取消息成功")
                         val entities = response.body()!!.map {
                             MessageEntity(
                                 id = it.id,
@@ -125,7 +124,6 @@ class ChatViewModel @Inject constructor(
 
                         }
                     } else {
-                        Log.d("ChatViewModelDebug", "获取消息失败")
                         viewModelScope.launch {
                             val cached = messageDao.getMessagesForConversation(convId)
                             cached.forEach { e ->
@@ -180,7 +178,6 @@ class ChatViewModel @Inject constructor(
                             )
                         }
                     }
-                    Log.e("ChatViewModel", "网络异常", t)
                     onError("网络异常：${t.localizedMessage}")
                 }
             })
@@ -230,7 +227,6 @@ class ChatViewModel @Inject constructor(
                 }
 
                 override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
-                    Log.e("ChatViewModel", "上传失败", t)
                     onResult(false)
                 }
             })
@@ -279,7 +275,6 @@ class ChatViewModel @Inject constructor(
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Log.e("ChatViewModel", "发送失败", t)
                 onResult(false)
             }
         })

@@ -62,44 +62,6 @@ class RegisterViewModel @Inject constructor(
             // 没有头像，直接注册
             sendRegister(username, password, "")
         }
-//        val usernameBody = username.toRequestBody("text/plain".toMediaType())
-//        val passwordBody = password.toRequestBody("text/plain".toMediaType())
-//
-//        val avatarPart: MultipartBody.Part? = avatarUri?.let { uri ->
-//            val file = uriToFile(context, uri)
-//            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-//            MultipartBody.Part.createFormData("avatar", file.name, requestFile)
-//        }
-//
-//        // 向后端发送注册请求
-//        userRepository.registerUserWithAvatar(
-//            username = usernameBody,
-//            password = passwordBody,
-//            avatar = avatarPart,
-//        ).enqueue(object : Callback<RegisterResponse> {
-//            override fun onResponse(
-//                call: Call<RegisterResponse>,
-//                response: Response<RegisterResponse>
-//            ) {
-//                if (response.isSuccessful) {
-//                    // 后端注册成功后，保存用户到本地数据库
-//                    viewModelScope.launch(Dispatchers.IO) {
-////                        userDao.insertUser(user)
-//                        _registerSuccess.value = true
-//                        delay(2000)  // 延时2秒后重置状态
-//                        resetState()
-//                    }
-//                } else {
-//                    val errorBody = response.errorBody()?.string()
-//                    Log.e("Register", "注册失败: $errorBody")
-//                    _registerSuccess.value = false
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
-//                _registerSuccess.value = false
-//            }
-//        })
     }
 
     private fun sendRegister(username: String, password: String, avatarUrl: String) {

@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
@@ -83,7 +84,8 @@ fun ChatMessageList(
     peerAvatarUrl: String?,
     isGroup: Boolean,
     context: Context,
-    viewModel: ChatViewModel
+    viewModel: ChatViewModel,
+    navController: NavController
 ) {
 
     // 屏幕宽度，用于气泡最大宽度
@@ -111,6 +113,7 @@ fun ChatMessageList(
                 if (!isSelf) {
                     val avatarPath = if (isGroup) msg.sender_avatar else peerAvatarUrl
                     val imageUrl = "$BASE_URL${avatarPath}"
+                    val profileRoute = "contact_profile/${msg.sender_id}"
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(imageUrl)
@@ -118,8 +121,9 @@ fun ChatMessageList(
                             .build(),
                         contentDescription = "Avatar",
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(40.dp)
                             .clip(RoundedCornerShape(8.dp))
+                            .clickable { navController.navigate(profileRoute) }
                     )
                     Spacer(Modifier.width(4.dp))
                 }
@@ -314,8 +318,11 @@ fun ChatMessageList(
                             .build(),
                         contentDescription = "My Avatar",
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(40.dp)
                             .clip(RoundedCornerShape(8.dp))
+                            .clickable{
+                                navController.navigate("profile")
+                            }
                     )
                 }
             }

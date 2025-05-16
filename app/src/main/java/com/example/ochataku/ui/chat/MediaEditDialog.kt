@@ -49,8 +49,6 @@ fun MediaEditDialog(
         val context = LocalContext.current
         val contentResolver = context.contentResolver
         val mimeType = contentResolver.getType(selectedMediaUri)
-        Log.d("mimetype", "Uri: $selectedMediaUri")
-        Log.d("mimetype", "Type: $mimeType")
 
 
         Dialog(onDismissRequest = onDismiss) {

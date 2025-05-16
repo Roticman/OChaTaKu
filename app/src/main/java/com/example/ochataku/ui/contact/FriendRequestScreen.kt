@@ -1,20 +1,49 @@
 package com.example.ochataku.ui.contact
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
+import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.viewmodel.FriendRequestViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,44 +60,158 @@ fun FriendRequestScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("好友请求") }
+                title = {
+                    Text(
+                        text = "好友请求",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            items(friendRequests) { request ->
-                if (request.status == 0) { // 只展示待处理的
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+        if (friendRequests.none { it.requestRow.status == 0 }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.PersonAdd,
+                        contentDescription = "无请求",
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                    )
+                    Text(
+                        text = "暂无好友请求",
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        fontSize = 18.sp
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                items(friendRequests) { request ->
+                    if (request.requestRow.status == 0) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
                         ) {
-                            Text(text = "来自用户：${request.fromUserId}")
-                            Spacer(modifier = Modifier.height(8.dp))
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Button(onClick = {
-                                    viewModel.handleFriendRequest(request.id, "accept") {
-                                        Toast.makeText(context, "已接受", Toast.LENGTH_SHORT).show()
+                                // 头像和用户信息部分
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(
+                                            "$BASE_URL${request.avatar}"
+                                        ),
+                                        contentDescription = "用户头像",
+                                        modifier = Modifier
+                                            .size(65.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+
+                                    Column {
+                                        Text(
+                                            text = request.nickname,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 16.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "请求添加好友",
+                                            fontSize = 14.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                        )
                                     }
-                                }) {
-                                    Text("同意")
                                 }
-                                Button(onClick = {
-                                    viewModel.handleFriendRequest(request.id, "reject") {
-                                        Toast.makeText(context, "已拒绝", Toast.LENGTH_SHORT).show()
+
+                                // 操作按钮部分
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Column {
+                                        Button(
+                                            onClick = {
+                                                viewModel.handleFriendRequest(
+                                                    requestId = request.requestRow.id,
+                                                    action = "accept",
+                                                    onResult = {
+                                                        Toast.makeText(context, "已接受", Toast.LENGTH_SHORT).show()
+                                                    },
+                                                    onError = {
+                                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                                    }
+                                                )
+
+                                            },
+                                            modifier = Modifier
+                                                .width(70.dp)
+                                                .height(40.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                            ),
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Text(text = "同意", fontSize = 10.sp)
+                                        }
+
+                                        Button(
+                                            onClick = {
+                                                viewModel.handleFriendRequest(
+                                                    requestId = request.requestRow.id,
+                                                    action = "reject",
+                                                    onResult = {
+                                                        Toast.makeText(context, "已拒绝", Toast.LENGTH_SHORT).show()
+                                                    },
+                                                    onError = {
+                                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                                    }
+                                                )
+
+                                            },
+                                            modifier = Modifier
+                                                .width(70.dp)
+                                                .height(40.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.surface,
+                                                contentColor = MaterialTheme.colorScheme.onSurface
+                                            ),
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Text(text = "拒绝", fontSize = 10.sp)
+                                        }
                                     }
-                                }) {
-                                    Text("拒绝")
                                 }
                             }
                         }

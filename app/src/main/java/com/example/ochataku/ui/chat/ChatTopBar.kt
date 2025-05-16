@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatTopBar(
+    peerId: Long,
     peerName: String,
     isGroup: Boolean,
     convId: Long,
@@ -23,7 +24,7 @@ fun ChatTopBar(
         title = { Text(peerName) },
         actions = {
             IconButton(onClick = {
-                val route = if (isGroup) "groupDetail/$convId" else "chatDetail/$convId"
+                val route = if (isGroup) "groupDetail/$convId" else "contact_profile/$peerId"
                 navController.navigate(route)
             }) {
                 Icon(Icons.Default.MoreVert, contentDescription = null)

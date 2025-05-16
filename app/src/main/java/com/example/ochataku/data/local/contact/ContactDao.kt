@@ -12,4 +12,8 @@ interface ContactDao {
 
     @Query("SELECT * FROM contact ORDER BY remark_name COLLATE NOCASE ASC")
     suspend fun getAllContacts(): List<ContactEntity>
+
+    @Query("DELETE FROM contact")
+    suspend fun clearContacts()
+
 }
