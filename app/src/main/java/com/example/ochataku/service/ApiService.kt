@@ -9,7 +9,9 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -30,6 +32,15 @@ interface ApiService {
 
     @POST("/api/user/search_user")
     suspend fun searchUsers(@Body body: Map<String, String>): List<UserSearchResult>
+
+    @POST("/api/user/deactivate/{id}")
+    suspend fun deactivateAccount(@Path("id") userId: Long): Response<Unit>
+
+    @POST("/api/user/change_password")
+    suspend fun changePassword(
+        @Body request: ChangePasswordRequest
+    ): Response<Unit>
+
 
 
     // ---------------------- 联系人管理 ----------------------
@@ -83,6 +94,13 @@ interface ApiService {
 
     @GET("/api/message/{convId}")
     fun getMessagesForConversation(@Path("convId") convId: Long): Call<List<MessageResponse>>
+
+    @HTTP(method = "DELETE", path = "/api/message/delete/{id}", hasBody = true)
+    suspend fun deleteMessage(
+        @Path("id") id: Long,
+        @Body userId: Map<String, Long> // mapOf("user_id" to currentUserId)
+    ): Response<Unit>
+
 
 
 

@@ -165,9 +165,7 @@ fun ChatInputBar(
                     TextButton(onClick = {
                         isDialogOpen = false
                         activity?.let {
-                            PermissionUtils.requestMediaPermission(it) {
-                                mediaPickerLauncher.launch("*/*")
-                            }
+                            mediaPickerLauncher.launch("*/*")
                         }
                     }) { Text("从相册选择") }
 

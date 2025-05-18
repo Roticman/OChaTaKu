@@ -1,4 +1,4 @@
-package com.example.ochataku.ui
+package com.example.ochataku.ui.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ochataku.R
@@ -38,7 +39,7 @@ import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.viewmodel.ProfileViewModel
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navController: NavController) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     Column(
@@ -103,7 +104,10 @@ fun ProfileScreen() {
         // 账户安全
         OptionItem(
             iconRes = R.mipmap.ic_account,
-            title = "账号与安全"
+            title = "账号与安全",
+            onClick = {
+                navController.navigate("account_security")
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))

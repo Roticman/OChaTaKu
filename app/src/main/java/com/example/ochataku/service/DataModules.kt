@@ -49,6 +49,13 @@ data class UserSimple(
     val avatar: String
 )
 
+data class ChangePasswordRequest(
+    val userId: Long,
+    val currentPassword: String,
+    val newPassword: String
+)
+
+
 // ---------------------- 联系人 / 好友请求 ----------------------
 data class AddContactRequest(
     val user_id: Long,
@@ -159,6 +166,7 @@ data class FriendRequestDisplay(
 )
 
 data class MessageDisplay(
+    val id: Long,
     val conv_id: Long,
     val sender_id: Long,
     val sender_name: String,

@@ -12,8 +12,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.message.MessageEntity
 import com.example.ochataku.data.local.user.UserDao
+import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.repository.MessageRepository
 import com.example.ochataku.repository.UserRepository
+import com.example.ochataku.service.ApiClient.apiService
+import com.example.ochataku.service.ApiService
 import com.example.ochataku.service.MessageDisplay
 import com.example.ochataku.service.MessageResponse
 import com.example.ochataku.service.SendMessageRequest
@@ -39,11 +42,16 @@ class ChatViewModel @Inject constructor(
     private val messageRepository: MessageRepository,
     private val userRepository: UserRepository,
     private val messageDao: MessageDao,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessageDisplay>>(emptyList())
     val messages: StateFlow<List<MessageDisplay>> = _messages
+
+    private val _quotedMessageId = MutableStateFlow<Long?>(null)
+    val quotedMessageId: StateFlow<Long?> = _quotedMessageId
+
 
     fun addMessage(raw: MessageDisplay) {
         viewModelScope.launch {
@@ -109,6 +117,7 @@ class ChatViewModel @Inject constructor(
                             _messages.value = entities.map { e ->
                                 val nameAndAvatar = fetchUserInfo(e.senderId);
                                 MessageDisplay(
+                                    id = e.id,
                                     conv_id = e.convId,
                                     sender_id = e.senderId,
                                     sender_name = nameAndAvatar.first,
@@ -135,6 +144,7 @@ class ChatViewModel @Inject constructor(
                             _messages.value = cached.map { e ->
                                 val nameAndAvatar = fetchUserInfo(e.senderId);
                                 MessageDisplay(
+                                    id = e.id,
                                     conv_id = e.convId,
                                     sender_id = e.senderId,
                                     sender_name = nameAndAvatar.first,
@@ -166,6 +176,7 @@ class ChatViewModel @Inject constructor(
                             val avatar = sender?.avatar ?: ""
 
                             MessageDisplay(
+                                id = e.id,
                                 conv_id = e.convId,
                                 sender_id = e.senderId,
                                 sender_name = name,
@@ -350,5 +361,42 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    fun deleteMessage(messageId: Long) {
+        viewModelScope.launch {
+            try {
+                val userId = authManager.getUserId()
+
+                // ⚠️ 前端先过滤校验：消息是否属于当前用户
+                val targetMsg = _messages.value.find { it.id == messageId }
+                if (targetMsg == null) {
+                    Log.e("ChatViewModel", "消息不存在：$messageId")
+                    return@launch
+                }
+
+                if (targetMsg.sender_id != userId) {
+                    Log.e("ChatViewModel", "禁止删除他人消息：sender=${targetMsg.sender_id}, me=$userId")
+                    return@launch
+                }
+
+                // ✅ 发起后端删除请求
+                val response = apiService.deleteMessage(
+                    messageId,
+                    mapOf("user_id" to userId)
+                )
+
+                if (response.isSuccessful) {
+                    _messages.value = _messages.value.filterNot { it.id == messageId }
+                } else {
+                    Log.e("ChatViewModel", "删除失败: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ChatViewModel", "删除异常: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun quoteMessage(messageId: Long, context: Context) {
+        Toast.makeText(context, "暂未实现", Toast.LENGTH_SHORT).show()
+    }
 
 }

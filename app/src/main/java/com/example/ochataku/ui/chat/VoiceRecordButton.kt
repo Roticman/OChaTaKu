@@ -1,5 +1,6 @@
 package com.example.ochataku.ui.chat
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.ChatViewModel
 import java.io.File
 
@@ -44,10 +46,13 @@ fun VoiceRecordButton(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = {
-                        isRecording = true
-                        startRecording(context)
-                        Toast.makeText(context, "开始录音...", Toast.LENGTH_SHORT).show()
-                    },
+                        PermissionUtils.requestAudioPermission(context as Activity) {
+                            isRecording = true
+                            startRecording(context)
+                            Toast.makeText(context, "开始录音...", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    ,
                     onPress = {
                         tryAwaitRelease()
                         isRecording = false

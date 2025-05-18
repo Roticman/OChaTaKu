@@ -1,10 +1,15 @@
 // ✅ 整合导航：MainActivity.kt（无嵌套 NavController）
 package com.example.ochataku.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -21,8 +26,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -31,14 +36,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ochataku.manager.AuthManager
+import com.example.ochataku.ui.profile.ProfileScreen
 import com.example.ochataku.ui.chat.ChatScreen
 import com.example.ochataku.ui.contact.AddFriendScreen
 import com.example.ochataku.ui.contact.ContactProfileScreen
 import com.example.ochataku.ui.contact.ContactScreen
 import com.example.ochataku.ui.contact.FriendRequestScreen
 import com.example.ochataku.ui.contact.GroupListScreen
+import com.example.ochataku.ui.profile.AccountSecurityScreen
+import com.example.ochataku.ui.profile.ChangePasswordScreen
 import com.example.ochataku.ui.theme.ChatAppTheme
-import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.LoginViewModel
 import com.example.ochataku.viewmodel.MainViewModel
 import com.example.ochataku.viewmodel.RegisterViewModel
@@ -46,10 +53,23 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.all { it.value }
+        if (allGranted) {
+            Toast.makeText(this, "存储权限已授权", Toast.LENGTH_SHORT).show()
+            // 可以进行文件访问了
+        } else {
+            Toast.makeText(this, "存储权限被拒绝，相关功能将无法使用", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val authManager = AuthManager(applicationContext)
-
+        requestStoragePermission()
 
         setContent {
             ChatAppTheme {
@@ -185,7 +205,7 @@ class MainActivity : ComponentActivity() {
 
 
                         composable("profile") {
-                            ProfileScreen()
+                            ProfileScreen(navController = navController)
                         }
 
                         composable("friend_request") {
@@ -205,38 +225,41 @@ class MainActivity : ComponentActivity() {
                                 navController = navController
                             )
                         }
+
+                        composable("account_security") {
+                            AccountSecurityScreen(navController = navController)
+                        }
+                        composable("change_password") {
+                            ChangePasswordScreen(navController = navController)
+                        }
                     }
                 }
             }
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        PermissionUtils.handlePermissionResult(this, requestCode, grantResults) {
-            when (requestCode) {
-                PermissionUtils.REQUEST_CODE_CAMERA -> {
-                    // 相机权限已授权，可以执行拍照逻辑
+    private fun requestStoragePermission() {
+        val permissions = if (Build.VERSION.SDK_INT >= 33) {
+            arrayOf(
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
+        } else {
+            mutableListOf(Manifest.permission.READ_EXTERNAL_STORAGE).apply {
+                if (Build.VERSION.SDK_INT <= 28) {
+                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
+            }.toTypedArray()
+        }
 
-                PermissionUtils.REQUEST_CODE_AUDIO -> {
-                    // 录音权限已授权
-                }
+        val notGranted = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
 
-                PermissionUtils.REQUEST_CODE_MEDIA -> {
-                    // 相册权限已授权
-                }
-            }
+        if (notGranted.isNotEmpty()) {
+            storagePermissionLauncher.launch(permissions)
         }
     }
-
-
 }
 
 @Composable
@@ -271,7 +294,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, "Profile") },
+            icon = { Icon(Icons.Default.Person, "profile") },
             label = { Text("个人") },
             selected = currentRoute == "profile",
             onClick = {

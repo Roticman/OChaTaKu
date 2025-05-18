@@ -3,6 +3,13 @@ package com.example.ochataku.manager
 import android.content.Context
 import androidx.core.content.edit
 import com.example.ochataku.data.local.user.UserEntity
+import com.example.ochataku.service.ApiClient
+import com.example.ochataku.service.ChangePasswordRequest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
 
 class AuthManager(private val context: Context) {
     companion object {
@@ -55,6 +62,12 @@ class AuthManager(private val context: Context) {
         )
     }
 
+    fun logout(onComplete: () -> Unit) {
+        clearAuth()
+        onComplete()
+    }
+
+
     fun getUserAvatar(): String? {
         return prefs.getString("avatar", "null")
     }
@@ -69,4 +82,60 @@ class AuthManager(private val context: Context) {
             clear()
         }
     }
+
+    fun deactivateAccount(
+        scope: CoroutineScope,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val userId = getUserId()
+        if (userId == -1L) {
+            onFailure("用户ID无效")
+            return
+        }
+
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = ApiClient.apiService.deactivateAccount(userId)
+                if (response.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        clearAuth()
+                        onSuccess()
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        onFailure("注销失败：${response.code()}")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onFailure("网络错误：${e.localizedMessage}")
+                }
+            }
+        }
+    }
+
+    suspend fun changePassword(currentPassword: String, newPassword: String) {
+        val userId = getUserId()
+        if (userId == -1L) throw IllegalStateException("用户未登录")
+
+        try {
+            val request = ChangePasswordRequest(
+                userId = userId,
+                currentPassword = currentPassword,
+                newPassword = newPassword
+            )
+
+            val response = ApiClient.apiService.changePassword(request)
+
+            if (!response.isSuccessful) {
+                throw IOException("修改失败：${response.code()} ${response.message()}")
+            }
+        } catch (e: Exception) {
+            throw IOException("网络错误：${e.localizedMessage}", e)
+        }
+    }
+
+
+
 }

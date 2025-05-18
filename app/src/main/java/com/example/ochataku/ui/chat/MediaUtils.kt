@@ -61,6 +61,7 @@ fun parseMessage(json: JSONObject): MessageDisplay {
     val isGroup = json.optInt("is_group", 0) == 1
 
     return MessageDisplay(
+        id = json.getLong("id"),
         conv_id = json.getLong("conv_id"),
         sender_id = json.getLong("sender_id"),
         sender_name = json.getString("sender_name"),

@@ -1,4 +1,16 @@
 <resources>
+    <string name="change_password_title">修改密码</string>
+    <string name="back">返回</string>
+    <string name="current_password">当前密码</string>
+    <string name="new_password">新密码</string>
+    <string name="confirm_new_password">确认新密码</string>
+    <string name="password_rule_length">至少8个字符</string>
+    <string name="password_rule_uppercase">至少一个大写字母</string>
+    <string name="password_rule_number">至少一个数字</string>
+    <string name="change_password_button">修改密码</string>
+    <string name="forgot_password">忘记密码？</string>
+    <string name="password_requirements_title">密码必须符合以下要求：</string>
+
     <string name="app_name">谷町</string>
     <string name="slogan">你的谷子，值得一条街的喝彩</string>
     <string name="sms_login_title">短信登录</string>

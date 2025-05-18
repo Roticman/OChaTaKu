@@ -1,5 +1,6 @@
 package com.example.ochataku.ui.chat
 
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,9 +10,11 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,6 +77,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.net.URL
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChatMessageList(
     messages: List<MessageDisplay>,
@@ -139,26 +143,7 @@ fun ChatMessageList(
                     }
 
                     val mediaPath = "$BASE_URL${msg.media_url}"
-//                    var showFullScreen by remember { mutableStateOf(false) }
-//                    var selectedMediaType by remember { mutableStateOf("image") }
                     val scope = rememberCoroutineScope()
-
-//                    if (showFullScreen) {
-//                        FullScreenMediaDialog(
-//                            mediaUrl = mediaPath,
-//                            mediaType = selectedMediaType,
-//                            onDismiss = { showFullScreen = false },
-//                            onSaveClick = {
-//                                scope.launch {
-//                                    if (selectedMediaType == "image") {
-//                                        saveImageToGallery(context, mediaPath)
-//                                    } else if (selectedMediaType == "video") {
-//                                        saveVideoToGallery(context, mediaPath)
-//                                    }
-//                                }
-//                            }
-//                        )
-//                    }
 
                     when (msg.message_type) {
                         "text" -> {
@@ -171,6 +156,12 @@ fun ChatMessageList(
                                 modifier = Modifier
                                     .widthIn(min = minBubbleWidth, max = maxBubbleWidth)
                                     .wrapContentWidth()
+                                    .combinedClickable(
+                                        onClick = {},
+                                        onLongClick = {
+                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                        }
+                                    )
                             ) {
                                 Text(
                                     text = msg.content,
@@ -213,7 +204,13 @@ fun ChatMessageList(
                                 modifier = Modifier
                                     .size(width = size.width, height = size.height)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .clickable { showFullImage = true },
+                                    .combinedClickable(
+                                        onClick = { showFullImage = true },
+                                        onLongClick = {
+                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                        }
+                                    ),
+
                                 contentScale = ContentScale.Fit
                             )
                         }
@@ -229,9 +226,12 @@ fun ChatMessageList(
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .width(width)
-                                    .clickable {
-                                        viewModel.playAudio(context, mediaPath)
-                                    },
+                                    .combinedClickable(
+                                        onClick = { viewModel.playAudio(context, mediaPath) },
+                                        onLongClick = {
+                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                        }
+                                    ),
                                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F7FA))
                             ) {
                                 Row(
@@ -276,9 +276,12 @@ fun ChatMessageList(
                                 modifier = Modifier
                                     .size(width = size.width, height = size.height)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        showFullScreen = true
-                                    }
+                                    .combinedClickable(
+                                        onClick = { showFullScreen = true },
+                                        onLongClick = {
+                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                        }
+                                    ),
                             ) {
                                 if (thumbnail != null) {
                                     Image(
@@ -320,7 +323,7 @@ fun ChatMessageList(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .clickable{
+                            .clickable {
                                 navController.navigate("profile")
                             }
                     )
@@ -329,6 +332,37 @@ fun ChatMessageList(
         }
     }
 }
+
+fun showMessageActionDialog(context: Context, messageId: Long, viewModel: ChatViewModel, currentUserId: Long) {
+    val userId = currentUserId  // ✅ 添加 getter 获取当前用户 ID
+    val message = viewModel.messages.value.find { it.id == messageId }
+
+    if (message == null) {
+        Toast.makeText(context, "消息不存在", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val isSelf = message.sender_id == userId
+    val options = if (isSelf) arrayOf("删除", "引用") else arrayOf("引用")
+
+    AlertDialog.Builder(context)
+        .setTitle("消息操作")
+        .setItems(options) { _, which ->
+            if (isSelf) {
+                when (which) {
+                    0 -> viewModel.deleteMessage(messageId)
+                    1 -> viewModel.quoteMessage(messageId, context)
+                }
+            } else {
+                when (which) {
+                    0 -> viewModel.quoteMessage(messageId, context)
+                }
+            }
+        }
+        .setNegativeButton("取消", null)
+        .show()
+}
+
 
 suspend fun saveImageToGallery(context: Context, url: String) {
     val request = ImageRequest.Builder(context)

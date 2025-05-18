@@ -1,4 +1,16 @@
 <resources>
+    <string name="change_password_title">Change Password</string>
+    <string name="back">Back</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="password_rule_length">At least 8 characters</string>
+    <string name="password_rule_uppercase">At least one uppercase letter</string>
+    <string name="password_rule_number">At least one number</string>
+    <string name="change_password_button">Change Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="password_requirements_title">Password must meet the following:</string>
+
     <string name="app_name">OChaTaKu</string>
     <string name="slogan">Your goods,Worthy of a street cheer</string>
     <string name="sms_login_title">sms_login</string>
