@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,12 +35,14 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.ochataku.R
 import com.example.ochataku.service.ApiClient.connectAndListen
 import com.example.ochataku.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
@@ -249,7 +250,7 @@ fun ChatScreen(
                     },
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("有新消息")
+                    Text(stringResource(R.string.new_message))
                 }
             }
         }
@@ -297,7 +298,11 @@ fun ChatScreen(
                 }
             } else {
                 // 没选择文件的情况，可以提醒用户
-                Toast.makeText(context, "请先选择文件", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.please_select_file),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     )

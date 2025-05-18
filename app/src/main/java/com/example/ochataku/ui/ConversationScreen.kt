@@ -1,7 +1,7 @@
 package com.example.ochataku.ui
 
+import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,7 +44,6 @@ import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.viewmodel.ConversationViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -55,6 +55,7 @@ fun ConversationScreen(
     val viewModel: ConversationViewModel = hiltViewModel()
 
     val conversations by viewModel.conversations.collectAsState()
+    val context = LocalContext.current
     // 收集所有群成员头像列表的 Map<ConvId, List<AvatarUrl>>
     val groupMembersMap by viewModel.groupMembersMap.collectAsState()
     val groupAvatarMap by viewModel.groupAvatarMap.collectAsState()
@@ -69,7 +70,7 @@ fun ConversationScreen(
             TopAppBar(
                 modifier = Modifier
                     .statusBarsPadding(),
-                title = { Text("会话", fontSize = 18.sp) },
+                title = { Text(stringResource(R.string.conversation), fontSize = 18.sp) },
                 colors = TopAppBarDefaults.smallTopAppBarColors()
             )
         }
@@ -85,12 +86,12 @@ fun ConversationScreen(
                         viewModel.deleteConversation(selectedConvId!!)
                         showDialog = false
                     }) {
-                        Text("删除")
+                        Text(stringResource(R.string.delete))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDialog = false }) {
-                        Text("取消")
+                        Text(stringResource(R.string.cancel))
                     }
                 },
                 title = { Text("删除会话") },
@@ -142,7 +143,8 @@ fun ConversationScreen(
                             )
                         },
                         headlineContent = {
-                            val name = if (convo.isGroup) "[群] ${convo.name}" else convo.name
+                            val name =
+                                if (convo.isGroup) "[${stringResource(R.string.group)}] ${convo.name}" else convo.name
                             Text(name, fontSize = 16.sp)
                         },
                         supportingContent = {
@@ -150,7 +152,7 @@ fun ConversationScreen(
                         },
                         trailingContent = {
                             Text(
-                                text = formatSmartTime(convo.timestamp),
+                                text = formatSmartTime(context = context, convo.timestamp),
                                 fontSize = 12.sp,
                                 color = Color.Gray,
                                 modifier = Modifier.padding(top = 4.dp)
@@ -169,23 +171,32 @@ fun ConversationScreen(
 }
 
 
-fun formatSmartTime(timestamp: Long): String {
+fun formatSmartTime(context: Context, timestamp: Long): String {
     val now = Calendar.getInstance()
     val msgTime = Calendar.getInstance().apply { timeInMillis = timestamp }
 
+    // 使用 App 当前的 Locale（受 DataStore 设置影响）
+    val locale = context.resources.configuration.locales[0]
+
     return when {
+        // 今天
         now.get(Calendar.YEAR) == msgTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) == msgTime.get(Calendar.DAY_OF_YEAR) -> {
-            SimpleDateFormat("HH:mm", Locale.getDefault()).format(msgTime.time)
+            SimpleDateFormat("HH:mm", locale).format(msgTime.time)
         }
 
+        // 昨天
         now.get(Calendar.YEAR) == msgTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) - msgTime.get(Calendar.DAY_OF_YEAR) == 1 -> {
-            "昨天 " + SimpleDateFormat("HH:mm", Locale.getDefault()).format(msgTime.time)
+            context.getString(R.string.yesterday) + " " + SimpleDateFormat("HH:mm", locale).format(
+                msgTime.time
+            )
         }
 
+        // 其他（星期几）
         else -> {
-            SimpleDateFormat("EEEE", Locale.getDefault()).format(msgTime.time) // 星期几
+            SimpleDateFormat("EEEE", locale).format(msgTime.time)
         }
     }
 }
+

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -63,13 +64,13 @@ fun ContactList(
     ) {
         item {
             ContactStaticItem(
-                title = "新的朋友",
+                title = stringResource(R.string.new_friend),
                 onClick = { navController.navigate("friend_request") })
             itemIndex++
         }
         item {
             ContactStaticItem(
-                title = "群聊",
+                title = stringResource(R.string.group_chat),
                 onClick = { navController.navigate("group_list") })
             itemIndex++
         }
@@ -159,7 +160,9 @@ fun ContactItem(
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = contact.remarkName.takeIf { !it.isNullOrEmpty() } ?: (username ?: "未知用户"),
+            text = contact.remarkName.takeIf { !it.isNullOrEmpty() } ?: (username ?: stringResource(
+                R.string.unknown_user
+            )),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Start
         )

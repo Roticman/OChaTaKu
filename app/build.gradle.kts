@@ -111,4 +111,7 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.6.1")
     implementation("androidx.media3:media3-common:1.6.1")
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+
 }

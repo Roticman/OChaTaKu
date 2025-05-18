@@ -33,11 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import com.example.ochataku.R
 import com.example.ochataku.service.MessageDisplay
 import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.ChatViewModel
@@ -108,7 +110,7 @@ fun ChatInputBar(
                     modifier = Modifier.weight(1f),
                     placeholder = {
                         Text(
-                            "输入消息...",
+                            text = stringResource(R.string.enter_something),
                             fontSize = 14.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -147,7 +149,7 @@ fun ChatInputBar(
                         }
                     }
                 }) {
-                    Text("发送")
+                    Text(stringResource(R.string.send))
                 }
             }
         }
@@ -157,7 +159,7 @@ fun ChatInputBar(
     if (isDialogOpen) {
         AlertDialog(
             onDismissRequest = { isDialogOpen = false },
-            title = { Text("选择功能") },
+            title = { Text(stringResource(R.string.select_function)) },
             confirmButton = {},
             text = {
                 Column {
@@ -167,7 +169,7 @@ fun ChatInputBar(
                         activity?.let {
                             mediaPickerLauncher.launch("*/*")
                         }
-                    }) { Text("从相册选择") }
+                    }) { Text(stringResource(R.string.select_from_photograph)) }
 
                     TextButton(onClick = {
                         isDialogOpen = false
@@ -176,7 +178,7 @@ fun ChatInputBar(
                                 imageCaptureLauncher.launch(null)
                             }
                         }
-                    }) { Text("拍照") }
+                    }) { Text(stringResource(R.string.take_photo)) }
 
                     TextButton(onClick = {
                         isDialogOpen = false
@@ -195,7 +197,7 @@ fun ChatInputBar(
                                 videoCaptureLauncher.launch(uri)
                             }
                         }
-                    }) { Text("拍视频") }
+                    }) { Text(stringResource(R.string.record_video)) }
                 }
             }
         )

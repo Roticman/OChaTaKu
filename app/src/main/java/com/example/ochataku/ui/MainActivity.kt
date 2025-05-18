@@ -2,7 +2,9 @@
 package com.example.ochataku.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -26,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -35,8 +38,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ochataku.R
+import com.example.ochataku.data.local.LanguagePreferences
 import com.example.ochataku.manager.AuthManager
-import com.example.ochataku.ui.profile.ProfileScreen
+import com.example.ochataku.theme.ChatAppTheme
 import com.example.ochataku.ui.chat.ChatScreen
 import com.example.ochataku.ui.contact.AddFriendScreen
 import com.example.ochataku.ui.contact.ContactProfileScreen
@@ -45,11 +50,17 @@ import com.example.ochataku.ui.contact.FriendRequestScreen
 import com.example.ochataku.ui.contact.GroupListScreen
 import com.example.ochataku.ui.profile.AccountSecurityScreen
 import com.example.ochataku.ui.profile.ChangePasswordScreen
-import com.example.ochataku.ui.theme.ChatAppTheme
+import com.example.ochataku.ui.profile.ProfileScreen
+import com.example.ochataku.ui.profile.ThemeSwitchScreen
 import com.example.ochataku.viewmodel.LoginViewModel
 import com.example.ochataku.viewmodel.MainViewModel
 import com.example.ochataku.viewmodel.RegisterViewModel
+import com.example.ochataku.viewmodel.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+import java.util.Locale
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -59,12 +70,32 @@ class MainActivity : ComponentActivity() {
     ) { permissions ->
         val allGranted = permissions.all { it.value }
         if (allGranted) {
-            Toast.makeText(this, "存储权限已授权", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                this.getString(R.string.storage_permission_granted),
+                Toast.LENGTH_SHORT
+            ).show()
             // 可以进行文件访问了
         } else {
-            Toast.makeText(this, "存储权限被拒绝，相关功能将无法使用", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                this.getString(R.string.storage_permission_denied),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
+
+    override fun attachBaseContext(newBase: Context) {
+        runBlocking {
+            val langCode = LanguagePreferences.getAppLanguage(newBase).firstOrNull() ?: "zh"
+            val locale = Locale(langCode)
+            val config = Configuration()
+            config.setLocale(locale)
+            val context = newBase.createConfigurationContext(config)
+            super.attachBaseContext(context)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +103,10 @@ class MainActivity : ComponentActivity() {
         requestStoragePermission()
 
         setContent {
-            ChatAppTheme {
+            val themeViewModel: ThemeViewModel = hiltViewModel()
+            val primaryColor by themeViewModel.primaryColor.collectAsState()
+
+            ChatAppTheme(primaryColor = primaryColor) {
                 val navController = rememberNavController()
                 val mainViewModel: MainViewModel = hiltViewModel()
                 val uiState by mainViewModel.uiState.collectAsState()
@@ -232,6 +266,10 @@ class MainActivity : ComponentActivity() {
                         composable("change_password") {
                             ChangePasswordScreen(navController = navController)
                         }
+                        composable("theme_switch") {
+                            ThemeSwitchScreen(navController = navController)
+                        }
+
                     }
                 }
             }
@@ -269,7 +307,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
     NavigationBar {
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, "Conversations") },
-            label = { Text("会话") },
+            label = { Text(stringResource(R.string.conversation)) },
             selected = currentRoute == "conversation",
             onClick = {
                 if (currentRoute != "conversation") {
@@ -282,7 +320,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.PhoneIphone, "Contacts") },
-            label = { Text("通讯录") },
+            label = { Text(stringResource(R.string.contact)) },
             selected = currentRoute == "contacts",
             onClick = {
                 if (currentRoute != "contacts") {
@@ -295,7 +333,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Person, "profile") },
-            label = { Text("个人") },
+            label = { Text(stringResource(R.string.profile)) },
             selected = currentRoute == "profile",
             onClick = {
                 if (currentRoute != "profile") {

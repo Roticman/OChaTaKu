@@ -20,7 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.ochataku.R
 import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.ChatViewModel
 import java.io.File
@@ -37,6 +39,8 @@ fun VoiceRecordButton(
     isGroup: Boolean
 ) {
     var isRecording by remember { mutableStateOf(false) }
+    val startRecording = stringResource(R.string.start_recording)
+    val voiceSent = stringResource(R.string.send_voice)
 
     Box(
         modifier = modifier
@@ -49,17 +53,16 @@ fun VoiceRecordButton(
                         PermissionUtils.requestAudioPermission(context as Activity) {
                             isRecording = true
                             startRecording(context)
-                            Toast.makeText(context, "开始录音...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, startRecording, Toast.LENGTH_SHORT).show()
                         }
-                    }
-                    ,
+                    },
                     onPress = {
                         tryAwaitRelease()
                         isRecording = false
                         stopRecording { audioPath ->
                             Toast.makeText(
                                 context,
-                                "录音发送：$audioPath",
+                                "${voiceSent}：$audioPath",
                                 Toast.LENGTH_SHORT
                             ).show()
                             viewModel.sendMessage(
@@ -78,6 +81,9 @@ fun VoiceRecordButton(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text("按住说话", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(R.string.hold_to_talk),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

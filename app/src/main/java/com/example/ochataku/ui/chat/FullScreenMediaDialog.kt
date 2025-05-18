@@ -14,10 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import com.example.ochataku.R
 
 @Composable
 fun FullScreenMediaDialog(
@@ -70,7 +72,7 @@ fun FullScreenMediaDialog(
             ) {
                 Icon(
                     imageVector = Icons.Default.Download,
-                    contentDescription = "保存",
+                    contentDescription = stringResource(R.string.save),
                     tint = Color.White
                 )
             }

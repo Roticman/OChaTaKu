@@ -1,7 +1,6 @@
 package com.example.ochataku.ui.chat
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
@@ -34,6 +34,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
+import com.example.ochataku.R
 
 @Composable
 fun MediaEditDialog(
@@ -70,7 +71,7 @@ fun MediaEditDialog(
                         isImage -> {
                             AsyncImage(
                                 model = selectedMediaUri,
-                                contentDescription = "图片预览",
+                                contentDescription = stringResource(R.string.image_preview),
                                 modifier = Modifier
                                     .size(250.dp)
                                     .clip(RoundedCornerShape(8.dp)),
@@ -81,7 +82,7 @@ fun MediaEditDialog(
                             VideoPlayer(uri = selectedMediaUri)
                         }
                         else -> {
-                            Text("无法预览该媒体类型", color = Color.White)
+                            Text(stringResource(R.string.cannot_preview_media), color = Color.White)
                         }
                     }
 
@@ -94,16 +95,16 @@ fun MediaEditDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         TextButton(onClick = { onCrop(selectedMediaUri) }) {
-                            Text("裁剪", color = Color.White)
+                            Text(stringResource(R.string.crop), color = Color.White)
                         }
                         TextButton(onClick = onRetake) {
-                            Text("重拍", color = Color.White)
+                            Text(stringResource(R.string.retake), color = Color.White)
                         }
                         TextButton(onClick = onReselect) {
-                            Text("重选", color = Color.White)
+                            Text(stringResource(R.string.reselect), color = Color.White)
                         }
                         TextButton(onClick = onDismiss) {
-                            Text("取消", color = Color.White)
+                            Text(stringResource(R.string.cancel), color = Color.White)
                         }
                     }
 
@@ -118,7 +119,7 @@ fun MediaEditDialog(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text("发送", color = Color.White)
+                        Text(stringResource(R.string.send), color = Color.White)
                     }
                 }
             }

@@ -1,4 +1,93 @@
 <resources>
+    <string name="group">群</string>
+    <string name="yesterday">昨天</string>
+    <string name="password">密码</string>
+    <string name="login">登录</string>
+
+    <string name="storage_permission_granted">存储权限已授权</string>
+    <string name="storage_permission_denied">存储权限被拒绝，相关功能将无法使用</string>
+
+    <string name="login_success">登录成功</string>
+    <string name="welcome_login">欢迎登录</string>
+    <string name="no_account_register">没有账号？立即注册</string>
+
+    <string name="conversation">会话</string>
+    <string name="contact">联系人</string>
+    <string name="profile">我的</string>
+    <string name="switch_language">切换语言</string>
+    <string name="switch_to">是否切换至英文版本？</string>
+    <string name="enter_something">请输入消息…</string>
+    <string name="select_function">选择功能</string>
+    <string name="select_from_photograph">从相册选择</string>
+
+    <string name="take_photo">拍照</string>
+    <string name="record_video">拍视频</string>
+    <string name="new_message">有新消息</string>
+    <string name="please_select_file">请先选择文件</string>
+    <string name="save">保存</string>
+    <string name="image_preview">图片预览</string>
+    <string name="cannot_preview_media">无法预览该媒体类型</string>
+    <string name="crop">裁剪</string>
+    <string name="retake">重拍</string>
+    <string name="reselect">重选</string>
+    <string name="play_voice">播放语音</string>
+    <string name="video_cover">视频封面</string>
+    <string name="play_video">播放视频</string>
+    <string name="message_not_exist">消息不存在</string>
+    <string name="quote">引用</string>
+    <string name="message_action">消息操作</string>
+    <string name="saved_to_gallery">已保存到相册</string>
+    <string name="video_saved_to_gallery">视频已保存到相册</string>
+    <string name="save_video_failed">保存视频失败</string>
+    <string name="start_recording">开始录音</string>
+    <string name="send_voice">录音发送</string>
+    <string name="hold_to_talk">按住说话</string>
+
+    <string name="search_user_nickname">搜索用户昵称</string>
+    <string name="clear">清除</string>
+    <string name="request_sent">请求发送成功</string>
+    <string name="already_friends">你们已经是好友了</string>
+    <string name="no_user_found">未找到相关用户</string>
+    <string name="input_nickname_hint">请输入用户昵称搜索</string>
+    <string name="user_avatar">用户头像</string>
+    <string name="add">添加</string>
+
+    <string name="new_friends">新的朋友</string>
+    <string name="unknown_user">未知用户</string>
+
+    <string name="user_detail">详细资料</string>
+    <string name="avatar">头像</string>
+    <string name="username">用户名</string>
+    <string name="user_id">用户ID</string>
+    <string name="gender">性别</string>
+    <string name="male">男</string>
+    <string name="female">女</string>
+    <string name="not_set">未设置</string>
+    <string name="birthday">生日</string>
+    <string name="region">地区</string>
+    <string name="signature">个性签名</string>
+    <string name="create_conversation_failed">创建会话失败</string>
+    <string name="not_filled">未填写</string>
+
+    <string name="register_success">注册成功！</string>
+    <string name="register_failed">注册失败，用户名可能已存在</string>
+    <string name="user_register">用户注册</string>
+    <string name="register_now">立即注册</string>
+
+    <string name="username_empty">用户名不能为空</string>
+    <string name="username_too_short">用户名至少4个字符</string>
+    <string name="username_too_long">用户名不能超过20个字符</string>
+    <string name="username_invalid">只能包含字母、数字和下划线</string>
+    <string name="username_all_digits">用户名不能全为数字</string>
+
+    <string name="password_empty">密码不能为空</string>
+    <string name="password_too_short">密码至少8个字符</string>
+    <string name="password_must_contain_digit">至少包含一个数字</string>
+    <string name="password_must_contain_letter">至少包含一个字母</string>
+
+    <string name="change_avatar">修改头像</string>
+
+    <!--    <string name=""></string>-->
     <string name="change_password_title">修改密码</string>
     <string name="back">返回</string>
     <string name="current_password">当前密码</string>
@@ -31,6 +120,10 @@
     <string name="theme">主题设置</string>
     <string name="language">语言</string>
     <string name="setting">设置</string>
+
+    <string name="select_theme_color">选择主题颜色</string>
+    <string name="current_theme">当前主题</string>
+    <string name="apply_this_theme">应用此主题</string>
 
     <string name="complete">完成</string>
     <string name="complete_with_count">完成(%d)</string>
@@ -88,6 +181,37 @@
     <string name="video_chat">视频聊天</string>
     <string name="add_to_contact">添加到通讯录</string>
     <string name="change_my_name_tip">好名字可以让你的朋友 更容易记住你。</string>
+
+    <string name="no_request">无请求</string>
+    <string name="no_friend_request">暂无好友请求</string>
+    <string name="request_add_friend">请求添加好友</string>
+    <string name="agree">同意</string>
+    <string name="refused">已拒绝</string>
+    <string name="refuse">拒绝</string>
+
+    <string name="search_group_chat">搜索群聊</string>
+    <string name="group_chat_list">群聊列表</string>
+    <string name="loading">加载中…</string>
+    <string name="no_group_chat">暂无群聊</string>
+
+
+    <string name="change_password">修改密码</string>
+    <string name="change_password_hint">定期修改密码可提高账号安全性</string>
+    <string name="modify">修改</string>
+
+    <string name="logout">退出登录</string>
+    <string name="logout_hint">退出当前账号，但保留账号数据</string>
+    <string name="exit">退出</string>
+
+    <string name="delete_account">注销账号</string>
+    <string name="delete_account_hint">永久删除账号及所有数据，操作不可撤销</string>
+
+    <string name="hide_password">隐藏密码</string>
+    <string name="show_password">显示密码</string>
+
+    <string name="confirm_delete_account">确认注销账号</string>
+    <string name="delete_account_warning">此操作将永久删除您的账号及所有数据，且无法恢复。确定要继续吗？</string>
+    <string name="confirm_delete">确认注销</string>
 
     <!--修改备注-->
     <string name="alias">备注名</string>

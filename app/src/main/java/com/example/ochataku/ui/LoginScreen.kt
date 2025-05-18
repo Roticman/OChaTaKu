@@ -32,10 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.ochataku.R
 import com.example.ochataku.viewmodel.LoginState
 import com.example.ochataku.viewmodel.LoginViewModel
 import com.example.ochataku.viewmodel.MainViewModel
@@ -62,7 +64,11 @@ fun LoginScreen(
         when (loginState) {
             is LoginState.Success -> {
                 isLoading = false
-                Toast.makeText(context, "登录成功", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.login_success),
+                    Toast.LENGTH_SHORT
+                ).show()
                 mainViewModel.refreshLoginStatus()
                 navController.navigate("conversation") {
                     popUpTo(0) { inclusive = true }
@@ -86,7 +92,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "欢迎登录",
+            text = stringResource(R.string.welcome_login),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 32.dp)
         )
@@ -120,7 +126,7 @@ fun LoginScreen(
             onClick = { navController.navigate("register") },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("没有账号？立即注册")
+            Text(stringResource(R.string.no_account_register))
         }
     }
 }
@@ -141,7 +147,7 @@ private fun LoginForm(
         OutlinedTextField(
             value = username,
             onValueChange = onUsernameChange,
-            label = { Text("用户名") },
+            label = { Text(stringResource(R.string.username)) },
             leadingIcon = {
                 Icon(Icons.Default.Person, contentDescription = null)
             },
@@ -153,7 +159,7 @@ private fun LoginForm(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text("密码") },
+            label = { Text(stringResource(R.string.password)) },
             leadingIcon = {
                 Icon(Icons.Default.Lock, contentDescription = null)
             },
@@ -196,7 +202,7 @@ private fun LoginButton(
                 modifier = Modifier.size(24.dp)
             )
         } else {
-            Text("登 录")
+            Text(stringResource(R.string.login))
         }
     }
 }

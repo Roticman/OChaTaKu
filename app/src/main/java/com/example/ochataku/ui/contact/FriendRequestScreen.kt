@@ -38,11 +38,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.example.ochataku.R
 import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.viewmodel.FriendRequestViewModel
 
@@ -62,7 +64,7 @@ fun FriendRequestScreen() {
             TopAppBar(
                 title = {
                     Text(
-                        text = "好友请求",
+                        text = stringResource(R.string.friend_request),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
@@ -88,12 +90,12 @@ fun FriendRequestScreen() {
                 ) {
                     Icon(
                         Icons.Default.PersonAdd,
-                        contentDescription = "无请求",
+                        contentDescription = stringResource(R.string.no_request),
                         modifier = Modifier.size(64.dp),
                         tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                     )
                     Text(
-                        text = "暂无好友请求",
+                        text = stringResource(R.string.no_friend_request),
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         fontSize = 18.sp
                     )
@@ -133,7 +135,7 @@ fun FriendRequestScreen() {
                                         painter = rememberAsyncImagePainter(
                                             "$BASE_URL${request.avatar}"
                                         ),
-                                        contentDescription = "用户头像",
+                                        contentDescription = stringResource(R.string.avatar),
                                         modifier = Modifier
                                             .size(65.dp)
                                             .clip(CircleShape),
@@ -148,7 +150,7 @@ fun FriendRequestScreen() {
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = "请求添加好友",
+                                            text = stringResource(R.string.request_add_friend),
                                             fontSize = 14.sp,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                         )
@@ -166,7 +168,11 @@ fun FriendRequestScreen() {
                                                     requestId = request.requestRow.id,
                                                     action = "accept",
                                                     onResult = {
-                                                        Toast.makeText(context, "已接受", Toast.LENGTH_SHORT).show()
+                                                        Toast.makeText(
+                                                            context,
+                                                            context.getString(R.string.agree),
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
                                                     },
                                                     onError = {
                                                         Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -183,7 +189,10 @@ fun FriendRequestScreen() {
                                             ),
                                             shape = RoundedCornerShape(8.dp)
                                         ) {
-                                            Text(text = "同意", fontSize = 10.sp)
+                                            Text(
+                                                text = stringResource(R.string.agree),
+                                                fontSize = 10.sp
+                                            )
                                         }
 
                                         Button(
@@ -192,7 +201,11 @@ fun FriendRequestScreen() {
                                                     requestId = request.requestRow.id,
                                                     action = "reject",
                                                     onResult = {
-                                                        Toast.makeText(context, "已拒绝", Toast.LENGTH_SHORT).show()
+                                                        Toast.makeText(
+                                                            context,
+                                                            context.getString(R.string.refused),
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
                                                     },
                                                     onError = {
                                                         Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -209,7 +222,10 @@ fun FriendRequestScreen() {
                                             ),
                                             shape = RoundedCornerShape(8.dp)
                                         ) {
-                                            Text(text = "拒绝", fontSize = 10.sp)
+                                            Text(
+                                                text = stringResource(R.string.refuse),
+                                                fontSize = 10.sp
+                                            )
                                         }
                                     }
                                 }

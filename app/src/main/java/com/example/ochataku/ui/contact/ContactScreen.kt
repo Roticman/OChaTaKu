@@ -25,9 +25,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.ochataku.R
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.viewmodel.ContactViewModel
 import kotlinx.coroutines.launch
@@ -51,10 +53,13 @@ fun ContactScreen(navController: NavController,) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("联系人") },
+                title = { Text(stringResource(R.string.contact)) },
                 actions = {
                     IconButton(onClick = { onAddContact(navController) }) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "添加联系人")
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.add_to_contact)
+                        )
                     }
                 }
             )

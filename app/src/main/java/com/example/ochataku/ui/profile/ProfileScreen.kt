@@ -1,5 +1,6 @@
 package com.example.ochataku.ui.profile
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,18 +16,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,13 +43,21 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ochataku.R
+import com.example.ochataku.data.local.LanguagePreferences
+import com.example.ochataku.manager.LanguageManager
 import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.viewmodel.ProfileViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(navController: NavController) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val isChinese = LanguageManager.getCurrentLanguage(context) == "zh"
+    var showLangDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,7 +120,7 @@ fun ProfileScreen(navController: NavController) {
         // 账户安全
         OptionItem(
             iconRes = R.mipmap.ic_account,
-            title = "账号与安全",
+            title = stringResource(R.string.account_security),
             onClick = {
                 navController.navigate("account_security")
             }
@@ -115,7 +131,7 @@ fun ProfileScreen(navController: NavController) {
         // 消息通知
         OptionItem(
             iconRes = R.mipmap.ic_notification,
-            title = "消息通知"
+            title = stringResource(R.string.message_notification)
         )
 
         // 聊天背景 (隐藏，不显示)
@@ -125,11 +141,11 @@ fun ProfileScreen(navController: NavController) {
         // 文件、收藏
         OptionItem(
             iconRes = R.mipmap.ic_settings_file,
-            title = "文件"
+            title = stringResource(R.string.file_ext_title)
         )
         OptionItem(
             iconRes = R.mipmap.ic_star,
-            title = "收藏"
+            title = stringResource(R.string.message_favorite)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -137,15 +153,56 @@ fun ProfileScreen(navController: NavController) {
         // 主题、语言、设置
         OptionItem(
             iconRes = R.mipmap.ic_theme,
-            title = "主题"
+            title = stringResource(R.string.theme),
+            onClick = {
+                navController.navigate("theme_switch")
+            }
         )
         OptionItem(
             iconRes = R.mipmap.ic_lang,
-            title = "语言"
+            title = stringResource(R.string.language),
+            onClick = {
+                showLangDialog = true
+            }
         )
+        val coroutineScope = rememberCoroutineScope()
+        if (showLangDialog) {
+            AlertDialog(
+                onDismissRequest = { showLangDialog = false },
+                title = {
+                    Text(stringResource(R.string.language))
+                },
+                text = {
+                    Text(
+                        stringResource(R.string.switch_to)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showLangDialog = false
+                        val targetLang = if (isChinese) "en" else "zh"
+
+                        coroutineScope.launch {
+                            LanguagePreferences.setAppLanguage(context, targetLang)
+                            activity?.let {
+                                LanguageManager.switchLanguage(it, targetLang)
+                            }
+                        }
+                    }) {
+                        Text(stringResource(R.string.confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showLangDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
+
         OptionItem(
             iconRes = R.mipmap.ic_setting,
-            title = "设置"
+            title = stringResource(R.string.setting)
         )
     }
 }

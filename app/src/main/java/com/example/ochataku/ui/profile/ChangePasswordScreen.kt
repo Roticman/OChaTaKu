@@ -197,7 +197,9 @@ private fun PasswordTextField(
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(
                     if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                    contentDescription = if (passwordVisible) "隐藏密码" else "显示密码"
+                    contentDescription = if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
+                        R.string.show_password
+                    )
                 )
             }
         },

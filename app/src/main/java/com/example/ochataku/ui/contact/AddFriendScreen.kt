@@ -48,12 +48,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.ochataku.R
 import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.service.UserSearchResult
 import com.example.ochataku.viewmodel.AddFriendViewModel
@@ -70,10 +72,13 @@ fun AddFriendScreen(navController: NavController, currentUserId: Long) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("添加好友") },
+                title = { Text(stringResource(R.string.add_friend)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -107,11 +112,11 @@ fun AddFriendScreen(navController: NavController, currentUserId: Long) {
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp),
-                        placeholder = { Text("搜索用户昵称") },
+                        placeholder = { Text(stringResource(R.string.search_user_nickname)) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Search,
-                                contentDescription = "搜索",
+                                contentDescription = stringResource(R.string.search),
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         },
@@ -123,7 +128,7 @@ fun AddFriendScreen(navController: NavController, currentUserId: Long) {
                                 }) {
                                     Icon(
                                         Icons.Default.Clear,
-                                        contentDescription = "清除",
+                                        contentDescription = stringResource(R.string.clear),
                                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
                                 }
@@ -162,7 +167,7 @@ fun AddFriendScreen(navController: NavController, currentUserId: Long) {
                     ) {
                         Icon(
                             Icons.Default.Search,
-                            contentDescription = "搜索",
+                            contentDescription = stringResource(R.string.search),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(20.dp)
                         )
@@ -184,11 +189,19 @@ fun AddFriendScreen(navController: NavController, currentUserId: Long) {
                                 viewModel.sendFriendRequest(
                                     userId,
                                     onSuccess = {
-                                        Toast.makeText(context, "请求发送成功", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.request_sent),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         navController.popBackStack()
                                     },
                                     onAlreadyFriend = {
-                                        Toast.makeText(context, "你们已经是好友了", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.already_friends),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     },
                                     onError = {
                                         Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -207,7 +220,7 @@ fun AddFriendScreen(navController: NavController, currentUserId: Long) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "未找到相关用户",
+                        stringResource(R.string.no_user_found),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
@@ -219,7 +232,7 @@ fun AddFriendScreen(navController: NavController, currentUserId: Long) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "请输入用户ID或昵称搜索",
+                        stringResource(R.string.input_nickname_hint),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
@@ -251,7 +264,7 @@ fun UserSearchResultItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
                     model = "$BASE_URL${user.avatar}",
-                    contentDescription = "用户头像",
+                    contentDescription = stringResource(R.string.user_avatar),
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(8.dp))
@@ -281,7 +294,7 @@ fun UserSearchResultItem(
                 ),
                 shape = RoundedCornerShape(20.dp)
             ) {
-                Text("添加")
+                Text(stringResource(R.string.add))
             }
         }
     }

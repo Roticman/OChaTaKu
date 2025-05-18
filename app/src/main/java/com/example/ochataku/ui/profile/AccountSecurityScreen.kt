@@ -35,10 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.ochataku.R
 import com.example.ochataku.viewmodel.AccountSecurityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,10 +52,13 @@ fun AccountSecurityScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("账号安全") },
+                title = { Text(stringResource(R.string.account_security)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -70,9 +75,9 @@ fun AccountSecurityScreen(navController: NavController) {
             // 修改密码卡片
             SecurityActionCard(
                 icon = Icons.Default.Lock,
-                title = "修改密码",
-                description = "定期修改密码可提高账号安全性",
-                buttonText = "修改",
+                title = stringResource(R.string.change_password),
+                description = stringResource(R.string.change_password_hint),
+                buttonText = stringResource(R.string.modify),
                 buttonColor = MaterialTheme.colorScheme.primary,
                 onClick = {
                     navController.navigate("change_password")
@@ -82,9 +87,9 @@ fun AccountSecurityScreen(navController: NavController) {
             // 退出登录卡片
             SecurityActionCard(
                 icon = Icons.Default.Logout,
-                title = "退出登录",
-                description = "退出当前账号，但保留账号数据",
-                buttonText = "退出",
+                title = stringResource(R.string.logout),
+                description = stringResource(R.string.logout_hint),
+                buttonText = stringResource(R.string.exit),
                 buttonColor = MaterialTheme.colorScheme.secondary,
                 onClick = {
                     viewModel.logout {
@@ -100,9 +105,9 @@ fun AccountSecurityScreen(navController: NavController) {
             // 注销账号卡片 - 更显眼的警告样式
             SecurityActionCard(
                 icon = Icons.Default.PersonRemove,
-                title = "注销账号",
-                description = "永久删除账号及所有数据，操作不可撤销",
-                buttonText = "注销",
+                title = stringResource(R.string.delete_account),
+                description = stringResource(R.string.delete_account_hint),
+                buttonText = stringResource(R.string.delete),
                 buttonColor = MaterialTheme.colorScheme.error,
                 onClick = {
                     viewModel.showDeleteDialog()
@@ -197,14 +202,14 @@ fun DeleteAccountConfirmationDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "确认注销账号",
+                text = stringResource(R.string.confirm_delete_account),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         },
         text = {
             Text(
-                text = "此操作将永久删除您的账号及所有数据，且无法恢复。确定要继续吗？",
+                text = stringResource(R.string.delete_account_warning),
                 style = MaterialTheme.typography.bodyMedium
             )
         },
@@ -216,7 +221,7 @@ fun DeleteAccountConfirmationDialog(
                     contentColor = MaterialTheme.colorScheme.onError
                 )
             ) {
-                Text("确认注销")
+                Text(stringResource(R.string.confirm_delete))
             }
         },
         dismissButton = {
@@ -227,7 +232,7 @@ fun DeleteAccountConfirmationDialog(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

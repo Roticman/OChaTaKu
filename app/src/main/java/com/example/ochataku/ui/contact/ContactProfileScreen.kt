@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,7 +57,6 @@ import com.example.ochataku.R
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.service.ApiClient
 import com.example.ochataku.service.ContactRequest
-import com.example.ochataku.service.ConversationRequest
 import com.example.ochataku.viewmodel.ContactProfileViewModel
 import kotlinx.coroutines.launch
 
@@ -76,7 +76,7 @@ fun ContactProfileScreen(navController: NavController, userId: Long) {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "详细资料",
+                        stringResource(R.string.user_detail),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
@@ -84,7 +84,7 @@ fun ContactProfileScreen(navController: NavController, userId: Long) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "返回"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -126,7 +126,7 @@ fun ContactProfileScreen(navController: NavController, userId: Long) {
                             .data(ApiClient.BASE_URL + profile!!.avatar)
                             .crossfade(true)
                             .build(),
-                        contentDescription = "头像",
+                        contentDescription = stringResource(R.string.avatar),
                         placeholder = rememberAsyncImagePainter(R.drawable.default_avatar),
                         error = rememberAsyncImagePainter(R.drawable.default_avatar),
                         contentScale = ContentScale.Crop,
@@ -153,46 +153,46 @@ fun ContactProfileScreen(navController: NavController, userId: Long) {
                     ) {
                         ProfileItem(
                             icon = R.drawable.ic_person,
-                            label = "用户名",
+                            label = stringResource(R.string.username),
                             value = profile!!.username
                         )
                         ProfileItem(
                             icon = R.drawable.ic_id,
-                            label = "用户ID",
+                            label = stringResource(R.string.user_id),
                             value = profile!!.userId.toString()
                         )
                         ProfileItem(
                             icon = R.drawable.ic_phone,
-                            label = "手机",
+                            label = stringResource(R.string.phone),
                             value = profile!!.phone
                         )
                         ProfileItem(
                             icon = R.drawable.ic_email,
-                            label = "邮箱",
+                            label = stringResource(R.string.email),
                             value = profile!!.email
                         )
                         ProfileItem(
                             icon = R.drawable.ic_gender,
-                            label = "性别",
+                            label = stringResource(R.string.gender),
                             value = when (profile!!.gender.toString()) {
-                                "MALE" -> "男"
-                                "FEMALE" -> "女"
-                                else -> "未设置"
+                                "MALE" -> stringResource(R.string.male)
+                                "FEMALE" -> stringResource(R.string.female)
+                                else -> stringResource(R.string.not_set)
                             }
                         )
                         ProfileItem(
                             icon = R.drawable.ic_birthdate,
-                            label = "生日",
+                            label = stringResource(R.string.birthday),
                             value = profile!!.birthDate
                         )
                         ProfileItem(
                             icon = R.drawable.ic_location,
-                            label = "地区",
+                            label = stringResource(R.string.region),
                             value = profile!!.region
                         )
                         ProfileItem(
                             icon = R.drawable.ic_signature,
-                            label = "个性签名",
+                            label = stringResource(R.string.signature),
                             value = profile!!.signature
                         )
                     }
@@ -219,7 +219,11 @@ fun ContactProfileScreen(navController: NavController, userId: Long) {
                                 navController.navigate("chat/$convId/${profile!!.userId}/$encodedName/false/$encodedAvatar")
                             } catch (e: Exception) {
                                 e.printStackTrace()
-                                Toast.makeText(context, "创建会话失败", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.create_conversation_failed),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     },
@@ -233,7 +237,7 @@ fun ContactProfileScreen(navController: NavController, userId: Long) {
                         contentColor = Color.White
                     )
                 ) {
-                    Text("发消息", fontSize = 16.sp)
+                    Text(stringResource(R.string.send_message), fontSize = 16.sp)
                 }
             }
         }
@@ -262,7 +266,7 @@ fun ProfileItem(icon: Int, label: String, value: String?) {
 //                )
 //            )
             Text(
-                text = "$label: ${value ?: "未填写"}",
+                text = "$label: ${value ?: stringResource(R.string.not_filled)}",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium

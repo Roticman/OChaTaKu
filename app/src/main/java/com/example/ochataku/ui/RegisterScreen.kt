@@ -1,5 +1,6 @@
 package com.example.ochataku.ui
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -70,10 +72,18 @@ fun RegisterScreen(
     LaunchedEffect(registerSuccess) {
         registerSuccess?.let {
             if (it) {
-                Toast.makeText(context, "注册成功！", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.register_success),
+                    Toast.LENGTH_SHORT
+                ).show()
                 onBack()
             } else {
-                Toast.makeText(context, "注册失败，用户名可能已存在", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.register_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             viewModel.resetState()
         }
@@ -82,10 +92,10 @@ fun RegisterScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("用户注册") },
+                title = { Text(stringResource(R.string.user_register)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 }
             )
@@ -105,7 +115,7 @@ fun RegisterScreen(
             InputField(
                 value = username,
                 onValueChange = { username = it },
-                label = "用户名",
+                label = stringResource(R.string.username),
                 errorMessage = inputErrors["username"],
                 modifier = Modifier.fillMaxWidth()
             )
@@ -123,7 +133,7 @@ fun RegisterScreen(
             InputField(
                 value = password,
                 onValueChange = { password = it },
-                label = "密码",
+                label = stringResource(R.string.password),
                 errorMessage = inputErrors["password"],
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
@@ -134,7 +144,7 @@ fun RegisterScreen(
 
                 onClick = {
 
-                    inputErrors = validateInputsWithMessages(username, password)
+                    inputErrors = validateInputsWithMessages(context, username, password)
                     if (inputErrors.all { it.value == null }) {
                         viewModel.registerUser(
                             context = context,
@@ -146,7 +156,7 @@ fun RegisterScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("立即注册")
+                Text(stringResource(R.string.register_now))
             }
 
 
@@ -156,28 +166,31 @@ fun RegisterScreen(
 
 // 带错误信息的验证函数
 fun validateInputsWithMessages(
+    context: Context,
     username: String,
-//    email: String,
     password: String
 ): Map<String, String?> {
     val errors = mutableMapOf<String, String?>()
 
     when {
-        username.isBlank() -> errors["username"] = "用户名不能为空"
-        username.length < 4 -> errors["username"] = "用户名至少4个字符"
-        username.length > 20 -> errors["username"] = "用户名不能超过20个字符"
+        username.isBlank() -> errors["username"] = context.getString(R.string.username_empty)
+        username.length < 4 -> errors["username"] = context.getString(R.string.username_too_short)
+        username.length > 20 -> errors["username"] = context.getString(R.string.username_too_long)
         !username.matches(Regex("^[a-zA-Z0-9_]+$")) ->
-            errors["username"] = "只能包含字母、数字和下划线"
+            errors["username"] = context.getString(R.string.username_invalid)
 
         username.matches(Regex("^\\d+$")) -> // 👈 新增这一行
-            errors["username"] = "用户名不能全为数字"
+            errors["username"] = context.getString(R.string.username_all_digits)
     }
 
     when {
-        password.isBlank() -> errors["password"] = "密码不能为空"
-        password.length < 8 -> errors["password"] = "密码至少8个字符"
-        !password.any { it.isDigit() } -> errors["password"] = "至少包含一个数字"
-        !password.any { it.isLetter() } -> errors["password"] = "至少包含一个字母"
+        password.isBlank() -> errors["password"] = context.getString(R.string.password_empty)
+        password.length < 8 -> errors["password"] = context.getString(R.string.password_too_short)
+        !password.any { it.isDigit() } -> errors["password"] =
+            context.getString(R.string.password_must_contain_digit)
+
+        !password.any { it.isLetter() } -> errors["password"] =
+            context.getString(R.string.password_must_contain_letter)
     }
 
     return errors
@@ -198,7 +211,7 @@ private fun AvatarPicker(
     Box(contentAlignment = Alignment.BottomEnd) {
         Image(
             painter = rememberAsyncImagePainter(avatarUri ?: R.drawable.default_avatar),
-            contentDescription = "用户头像",
+            contentDescription = stringResource(R.string.avatar),
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
@@ -207,7 +220,7 @@ private fun AvatarPicker(
         )
         Icon(
             imageVector = Icons.Default.Edit,
-            contentDescription = "修改头像",
+            contentDescription = stringResource(R.string.change_avatar),
             modifier = Modifier
                 .size(24.dp)
                 .background(MaterialTheme.colorScheme.primary, CircleShape)

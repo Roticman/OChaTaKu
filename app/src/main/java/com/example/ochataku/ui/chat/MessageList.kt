@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,6 +66,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import com.example.ochataku.R
 import com.example.ochataku.service.ApiClient.BASE_URL
 import com.example.ochataku.service.MessageDisplay
 import com.example.ochataku.viewmodel.ChatViewModel
@@ -159,7 +161,12 @@ fun ChatMessageList(
                                     .combinedClickable(
                                         onClick = {},
                                         onLongClick = {
-                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                            showMessageActionDialog(
+                                                context,
+                                                msg.id,
+                                                viewModel,
+                                                currentUserId
+                                            )
                                         }
                                     )
                             ) {
@@ -207,7 +214,12 @@ fun ChatMessageList(
                                     .combinedClickable(
                                         onClick = { showFullImage = true },
                                         onLongClick = {
-                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                            showMessageActionDialog(
+                                                context,
+                                                msg.id,
+                                                viewModel,
+                                                currentUserId
+                                            )
                                         }
                                     ),
 
@@ -229,7 +241,12 @@ fun ChatMessageList(
                                     .combinedClickable(
                                         onClick = { viewModel.playAudio(context, mediaPath) },
                                         onLongClick = {
-                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                            showMessageActionDialog(
+                                                context,
+                                                msg.id,
+                                                viewModel,
+                                                currentUserId
+                                            )
                                         }
                                     ),
                                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F7FA))
@@ -238,7 +255,12 @@ fun ChatMessageList(
                                     modifier = Modifier.padding(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = "播放语音")
+                                    Icon(
+                                        Icons.Default.PlayArrow,
+                                        contentDescription = stringResource(
+                                            R.string.play_voice
+                                        )
+                                    )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
                                         "${durationSec.value}″",
@@ -279,14 +301,19 @@ fun ChatMessageList(
                                     .combinedClickable(
                                         onClick = { showFullScreen = true },
                                         onLongClick = {
-                                            showMessageActionDialog(context, msg.id, viewModel, currentUserId)
+                                            showMessageActionDialog(
+                                                context,
+                                                msg.id,
+                                                viewModel,
+                                                currentUserId
+                                            )
                                         }
                                     ),
                             ) {
                                 if (thumbnail != null) {
                                     Image(
                                         bitmap = thumbnail.asImageBitmap(),
-                                        contentDescription = "视频封面",
+                                        contentDescription = stringResource(R.string.video_cover),
                                         contentScale = ContentScale.Fit,
                                         modifier = Modifier.fillMaxSize()
                                     )
@@ -300,7 +327,7 @@ fun ChatMessageList(
 
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = "播放视频",
+                                    contentDescription = stringResource(R.string.play_video),
                                     tint = Color.White,
                                     modifier = Modifier
                                         .size(48.dp)
@@ -333,20 +360,27 @@ fun ChatMessageList(
     }
 }
 
+
 fun showMessageActionDialog(context: Context, messageId: Long, viewModel: ChatViewModel, currentUserId: Long) {
     val userId = currentUserId  // ✅ 添加 getter 获取当前用户 ID
     val message = viewModel.messages.value.find { it.id == messageId }
 
+    val messageNotExist = context.getString(R.string.message_not_exist)
+    val delete = context.getString(R.string.delete)
+    val quote = context.getString(R.string.quote)
+    val messageAction = context.getString(R.string.message_action)
+    val cancel = context.getString(R.string.cancel)
+
     if (message == null) {
-        Toast.makeText(context, "消息不存在", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, messageNotExist, Toast.LENGTH_SHORT).show()
         return
     }
 
     val isSelf = message.sender_id == userId
-    val options = if (isSelf) arrayOf("删除", "引用") else arrayOf("引用")
+    val options = if (isSelf) arrayOf(delete, quote) else arrayOf(quote)
 
     AlertDialog.Builder(context)
-        .setTitle("消息操作")
+        .setTitle(messageAction)
         .setItems(options) { _, which ->
             if (isSelf) {
                 when (which) {
@@ -359,12 +393,13 @@ fun showMessageActionDialog(context: Context, messageId: Long, viewModel: ChatVi
                 }
             }
         }
-        .setNegativeButton("取消", null)
+        .setNegativeButton(cancel, null)
         .show()
 }
 
 
 suspend fun saveImageToGallery(context: Context, url: String) {
+    val saveGallery = context.getString(R.string.saved_to_gallery)
     val request = ImageRequest.Builder(context)
         .data(url)
         .allowHardware(false)
@@ -398,12 +433,14 @@ suspend fun saveImageToGallery(context: Context, url: String) {
 
         fos?.use {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-            Toast.makeText(context, "已保存到相册", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, saveGallery, Toast.LENGTH_SHORT).show()
         }
     }
 }
 
 suspend fun saveVideoToGallery(context: Context, url: String) {
+    val videoSaveGallery = context.getString(R.string.video_saved_to_gallery)
+    val videoSaveFailed = context.getString(R.string.save_video_failed)
     withContext(Dispatchers.IO) {
         try {
             val input: InputStream = URL(url).openStream()
@@ -433,12 +470,13 @@ suspend fun saveVideoToGallery(context: Context, url: String) {
             }
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "视频已保存到相册", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, videoSaveGallery, Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "保存视频失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "${videoSaveFailed}: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
             e.printStackTrace()
         }

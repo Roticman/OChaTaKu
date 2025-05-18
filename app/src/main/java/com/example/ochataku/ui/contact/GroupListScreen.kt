@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -61,19 +61,22 @@ fun GroupListScreen(
         OutlinedTextField(
             value = searchText.value,
             onValueChange = { searchText.value = it },
-            label = { Text("搜索群聊（尚未启用）") },
+            label = { Text(stringResource(R.string.search_group_chat)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
 
-        Text("群聊列表", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            stringResource(R.string.group_chat_list),
+            style = MaterialTheme.typography.headlineSmall
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
         if (isLoading) {
-            Text("加载中...")
+            Text(stringResource(R.string.loading))
         } else if (groupList.isEmpty()) {
-            Text("暂无群聊")
+            Text(stringResource(R.string.no_group_chat))
         } else {
             groupList.forEach { group ->
                 Row(
