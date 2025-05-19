@@ -1,8 +1,14 @@
 <resources>
+    <string name="user">用户</string>
     <string name="group">群</string>
     <string name="yesterday">昨天</string>
     <string name="password">密码</string>
     <string name="login">登录</string>
+    <string name="detail_updated">资料已更新</string>
+    <string name="update_failed">更新失败</string>
+    <string name="update_success">更新成功</string>
+    <string name="basic_info">基本信息</string>
+    <string name="personal_info">个人信息</string>
 
     <string name="storage_permission_granted">存储权限已授权</string>
     <string name="storage_permission_denied">存储权限被拒绝，相关功能将无法使用</string>
@@ -55,6 +61,7 @@
     <string name="new_friends">新的朋友</string>
     <string name="unknown_user">未知用户</string>
 
+    <string name="edit_detail">编辑资料</string>
     <string name="user_detail">详细资料</string>
     <string name="avatar">头像</string>
     <string name="username">用户名</string>

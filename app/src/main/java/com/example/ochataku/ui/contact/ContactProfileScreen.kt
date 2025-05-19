@@ -174,9 +174,9 @@ fun ContactProfileScreen(navController: NavController, userId: Long) {
                         ProfileItem(
                             icon = R.drawable.ic_gender,
                             label = stringResource(R.string.gender),
-                            value = when (profile!!.gender.toString()) {
-                                "MALE" -> stringResource(R.string.male)
-                                "FEMALE" -> stringResource(R.string.female)
+                            value = when (profile!!.gender) {
+                                1 -> stringResource(R.string.male)
+                                2 -> stringResource(R.string.female)
                                 else -> stringResource(R.string.not_set)
                             }
                         )

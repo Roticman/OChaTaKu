@@ -55,6 +55,18 @@ data class ChangePasswordRequest(
     val newPassword: String
 )
 
+data class UpdateProfileRequest(
+    val userId: Long,
+    val username: String,
+    val phone: String?,
+    val email: String?,
+    val gender: Int?,
+    val birthday: String?,
+    val region: String?,
+    val signature: String?
+)
+
+
 
 // ---------------------- 联系人 / 好友请求 ----------------------
 data class AddContactRequest(

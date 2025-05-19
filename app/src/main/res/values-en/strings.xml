@@ -1,6 +1,12 @@
 <resources>
+    <string name="user">user</string>
     <string name="group">group </string>
     <string name="yesterday">yesterday</string>
+    <string name="detail_updated">Detail Updated</string>
+    <string name="update_failed">Update failed</string>
+    <string name="update_success">Update Success</string>
+    <string name="basic_info">Basic Info</string>
+    <string name="personal_info">Personal Info</string>
 
     <string name="login_success">Login Successful</string>
     <string name="welcome_login">Welcome Back</string>
@@ -75,6 +81,7 @@
     <string name="new_friends">New Friends</string>
     <string name="unknown_user">Unknown User</string>
 
+    <string name="edit_detail">Edit Detail</string>
     <string name="user_detail">User Details</string>
     <string name="avatar">Avatar</string>
     <string name="username">Username</string>
@@ -256,7 +263,7 @@
     <string name="set_group_permission_error">Failed to set group member permissions: %d</string>
     <string name="mute_operation_failed">Mute operation failed %d</string>
     <string name="group_announcement_max_length">Group announcement limited to 2000 characters</string>
-    <string name="processing">Processing...</string>
+    <string name="processing">Processing…</string>
     <string name="set_group_announcement_success">Group announcement set successfully</string>
     <string name="set_group_announcement_failed">Failed to set group announcement: %1$d %2$s</string>
     <string name="modify_group_name_success">Group name changed successfully</string>

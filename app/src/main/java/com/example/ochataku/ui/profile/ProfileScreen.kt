@@ -71,7 +71,9 @@ fun ProfileScreen(navController: NavController) {
                 .height(100.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = 20.dp, start = 16.dp, end = 16.dp)
-                .clickable { /* TODO: 点击头像区域处理 */ },
+                .clickable {
+                    navController.navigate("profile_edit")
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(

@@ -50,6 +50,7 @@ import com.example.ochataku.ui.contact.FriendRequestScreen
 import com.example.ochataku.ui.contact.GroupListScreen
 import com.example.ochataku.ui.profile.AccountSecurityScreen
 import com.example.ochataku.ui.profile.ChangePasswordScreen
+import com.example.ochataku.ui.profile.ProfileEditScreen
 import com.example.ochataku.ui.profile.ProfileScreen
 import com.example.ochataku.ui.profile.ThemeSwitchScreen
 import com.example.ochataku.viewmodel.LoginViewModel
@@ -269,6 +270,10 @@ class MainActivity : ComponentActivity() {
                         composable("theme_switch") {
                             ThemeSwitchScreen(navController = navController)
                         }
+                        composable("profile_edit") {
+                            ProfileEditScreen(navController = navController)
+                        }
+
 
                     }
                 }

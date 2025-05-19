@@ -41,7 +41,8 @@ interface ApiService {
         @Body request: ChangePasswordRequest
     ): Response<Unit>
 
-
+    @POST("/api/user/update_profile")
+    suspend fun updateProfile(@Body request: UpdateProfileRequest): Response<Unit>
 
     // ---------------------- 联系人管理 ----------------------
     @GET("/api/contact/{userId}")
