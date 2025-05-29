@@ -1,17 +1,16 @@
 package com.example.ochataku.repository
 
-import android.util.Log
 import com.example.ochataku.data.local.conversation.ConversationDao
 import com.example.ochataku.data.local.conversation.ConversationDisplay
 import com.example.ochataku.data.local.conversation.ConversationEntity
 import com.example.ochataku.service.ApiService
-import com.example.ochataku.service.ContactConvResponse
-import com.example.ochataku.service.ContactRequest
-import com.example.ochataku.service.ConversationRequest
-import com.example.ochataku.service.ConversationResponse
-import com.example.ochataku.service.GroupMember
-import com.example.ochataku.service.GroupSimple
-import com.example.ochataku.service.UploadResponse
+import com.example.ochataku.model.ContactConvResponse
+import com.example.ochataku.model.ContactRequest
+import com.example.ochataku.model.ConversationRequest
+import com.example.ochataku.model.ConversationResponse
+import com.example.ochataku.model.GroupMember
+import com.example.ochataku.model.GroupSimple
+import com.example.ochataku.model.UploadResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody

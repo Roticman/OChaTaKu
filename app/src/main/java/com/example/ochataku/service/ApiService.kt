@@ -3,20 +3,44 @@ package com.example.ochataku.service
 
 import com.example.ochataku.data.local.contact.ContactEntity
 import com.example.ochataku.data.local.group.GroupEntity
+import com.example.ochataku.model.AddContactRequest
+import com.example.ochataku.model.ChangePasswordRequest
+import com.example.ochataku.model.ChatRequest
+import com.example.ochataku.model.ChatResponse
+import com.example.ochataku.model.ContactConvResponse
+import com.example.ochataku.model.ContactRequest
+import com.example.ochataku.model.ContactSimple
+import com.example.ochataku.model.ConversationRequest
+import com.example.ochataku.model.ConversationResponse
+import com.example.ochataku.model.FriendRequest
+import com.example.ochataku.model.FriendRequestPayload
+import com.example.ochataku.model.GroupMember
+import com.example.ochataku.model.GroupSimple
+import com.example.ochataku.model.HandleFriendRequest
+import com.example.ochataku.model.LoginRequest
+import com.example.ochataku.model.LoginResponse
+import com.example.ochataku.model.MessageResponse
+import com.example.ochataku.model.ProfileUiState
+import com.example.ochataku.model.RegisterRequest
+import com.example.ochataku.model.RegisterResponse
+import com.example.ochataku.model.SendMessageRequest
+import com.example.ochataku.model.UpdateProfileRequest
+import com.example.ochataku.model.UploadResponse
+import com.example.ochataku.model.UserSearchResult
+import com.example.ochataku.model.UserSimple
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
+import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ApiService {
 
@@ -135,5 +159,4 @@ interface ApiService {
     @POST("/api/upload/messages/images")
     fun uploadImage(@Part file: MultipartBody.Part): Call<UploadResponse>
 }
-
 

@@ -2,11 +2,9 @@ package com.example.ochataku.repository
 
 import com.example.ochataku.data.local.contact.ContactDao
 import com.example.ochataku.data.local.contact.ContactEntity
-import com.example.ochataku.data.local.group.GroupDao
-import com.example.ochataku.data.local.group.GroupEntity
-import com.example.ochataku.service.AddContactRequest
+import com.example.ochataku.model.AddContactRequest
 import com.example.ochataku.service.ApiClient.apiService
-import com.example.ochataku.service.ContactSimple
+import com.example.ochataku.model.ContactSimple
 import javax.inject.Inject
 
 class ContactRepository @Inject constructor(

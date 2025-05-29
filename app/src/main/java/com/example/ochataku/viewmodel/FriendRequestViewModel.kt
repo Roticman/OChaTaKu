@@ -4,8 +4,7 @@ package com.example.ochataku.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ochataku.repository.FriendRequestRepository
-import com.example.ochataku.service.FriendRequest
-import com.example.ochataku.service.FriendRequestDisplay
+import com.example.ochataku.model.FriendRequestDisplay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -56,7 +56,7 @@ import coil.request.ImageRequest
 import com.example.ochataku.R
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.service.ApiClient
-import com.example.ochataku.service.ContactRequest
+import com.example.ochataku.model.ContactRequest
 import com.example.ochataku.viewmodel.ContactProfileViewModel
 import kotlinx.coroutines.launch
 

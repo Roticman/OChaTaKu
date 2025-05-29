@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ochataku.R
 import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.message.MessageEntity
 import com.example.ochataku.data.local.user.UserDao
@@ -16,11 +17,11 @@ import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.repository.MessageRepository
 import com.example.ochataku.repository.UserRepository
 import com.example.ochataku.service.ApiClient.apiService
-import com.example.ochataku.service.ApiService
-import com.example.ochataku.service.MessageDisplay
-import com.example.ochataku.service.MessageResponse
-import com.example.ochataku.service.SendMessageRequest
-import com.example.ochataku.service.UploadResponse
+import com.example.ochataku.model.MessageDisplay
+import com.example.ochataku.model.MessageResponse
+import com.example.ochataku.model.QuotedMessage
+import com.example.ochataku.model.SendMessageRequest
+import com.example.ochataku.model.UploadResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +35,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.sql.Timestamp
 import javax.inject.Inject
 
 @HiltViewModel
@@ -49,8 +49,8 @@ class ChatViewModel @Inject constructor(
     private val _messages = MutableStateFlow<List<MessageDisplay>>(emptyList())
     val messages: StateFlow<List<MessageDisplay>> = _messages
 
-    private val _quotedMessageId = MutableStateFlow<Long?>(null)
-    val quotedMessageId: StateFlow<Long?> = _quotedMessageId
+    private val _quotedMessage = MutableStateFlow<QuotedMessage?>(null)
+    val quotedMessage: StateFlow<QuotedMessage?> = _quotedMessage
 
 
     fun addMessage(raw: MessageDisplay) {
@@ -235,6 +235,7 @@ class ChatViewModel @Inject constructor(
                     } else {
                         onResult(false)
                     }
+                    cancelQuote()
                 }
 
                 override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
@@ -396,7 +397,50 @@ class ChatViewModel @Inject constructor(
     }
 
     fun quoteMessage(messageId: Long, context: Context) {
-        Toast.makeText(context, "暂未实现", Toast.LENGTH_SHORT).show()
+        val message = messages.value.find { it.id == messageId }
+
+        if (message == null) {
+            Toast.makeText(context, context.getString(R.string.message_not_exist), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val quoted = when (message.message_type) {
+            "text" -> QuotedMessage(
+                id = message.id,
+                type = "text",
+                preview = message.content
+            )
+            "image" -> QuotedMessage(
+                id = message.id,
+                type = "image",
+                preview = context.getString(R.string.image_preview_2),
+                mediaUrl = message.media_url
+            )
+            "voice" -> QuotedMessage(
+                id = message.id,
+                type = "voice",
+                preview = context.getString(R.string.voice_preview)
+            )
+            "video" -> QuotedMessage(
+                id = message.id,
+                type = "video",
+                preview = context.getString(R.string.video_preview),
+                mediaUrl = message.media_url
+            )
+            else -> QuotedMessage(
+                id = message.id,
+                type = "unknown",
+                preview = context.getString(R.string.message_unknown_option)
+            )
+        }
+
+        _quotedMessage.value = quoted
     }
+
+    fun cancelQuote() {
+        _quotedMessage.value = null
+    }
+
+
 
 }

@@ -68,7 +68,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.ochataku.R
 import com.example.ochataku.service.ApiClient.BASE_URL
-import com.example.ochataku.service.MessageDisplay
+import com.example.ochataku.model.MessageDisplay
 import com.example.ochataku.viewmodel.ChatViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

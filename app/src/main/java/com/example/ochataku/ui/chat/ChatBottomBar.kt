@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.AlertDialog
@@ -27,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import com.example.ochataku.R
-import com.example.ochataku.service.MessageDisplay
+import com.example.ochataku.model.MessageDisplay
 import com.example.ochataku.utils.PermissionUtils
 import com.example.ochataku.viewmodel.ChatViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -70,13 +72,68 @@ fun ChatInputBar(
 ) {
     var isVoiceMode by remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
+    val quoted by viewModel.quotedMessage.collectAsState()
+
 
     Surface(
         modifier = Modifier.imePadding(),
         color = MaterialTheme.colorScheme.background,
         tonalElevation = 3.dp
     ) {
-        Row(
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            // ✅ 显示引用消息
+            quoted?.let { msg ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.replying_to),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+
+                            when (msg.type) {
+                                "text" -> Text(msg.preview, maxLines = 1)
+                                "image" -> Text(
+                                    "[图片]",
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+
+                                "video" -> Text(
+                                    "[视频]",
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+
+                                "voice" -> Text(
+                                    "[语音消息]",
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+
+                                else -> Text(
+                                    "[未知消息]",
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
+                        IconButton(onClick = { viewModel.cancelQuote() }) {
+                            Icon(Icons.Default.Close, contentDescription = "取消引用")
+                        }
+                    }
+                }
+            }
+
+            Row(
             Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
@@ -201,5 +258,6 @@ fun ChatInputBar(
                 }
             }
         )
+    }
     }
 }

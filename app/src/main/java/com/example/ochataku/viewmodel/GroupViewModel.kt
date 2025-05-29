@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.ochataku.data.local.group.GroupEntity
 import com.example.ochataku.repository.ConversationRepository
 import com.example.ochataku.repository.GroupRepository
-import com.example.ochataku.service.ContactConvResponse
-import com.example.ochataku.service.ContactRequest
+import com.example.ochataku.model.ContactConvResponse
+import com.example.ochataku.model.ContactRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -33,7 +33,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.ochataku.R
 import com.example.ochataku.service.ApiClient
-import com.example.ochataku.service.ContactRequest
+import com.example.ochataku.model.ContactRequest
 import com.example.ochataku.viewmodel.GroupViewModel
 import kotlinx.coroutines.launch
 

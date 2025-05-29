@@ -6,19 +6,16 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
-import com.example.ochataku.data.local.conversation.ConversationDao
 import com.example.ochataku.data.local.conversation.ConversationDisplay
-import com.example.ochataku.data.local.conversation.ConversationEntity
 import com.example.ochataku.repository.ConversationRepository
-import com.example.ochataku.repository.UserRepository
 import com.example.ochataku.service.ApiClient.apiService
-import com.example.ochataku.service.ConversationResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -33,9 +30,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -45,6 +39,8 @@ class ConversationViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val conversationRepository: ConversationRepository,
 ) : ViewModel() {
+    private val _unreadConversations = mutableStateOf(setOf<Long>())
+    val unreadConversations = _unreadConversations
 
     private val _conversations = MutableStateFlow<List<ConversationDisplay>>(emptyList())
     val conversations: StateFlow<List<ConversationDisplay>> = _conversations
@@ -56,6 +52,21 @@ class ConversationViewModel @Inject constructor(
     // —— 新增：convId -> 已合成并上传后的群头像 URL
     private val _groupAvatarMap = MutableStateFlow<Map<Long, String?>>(emptyMap())
     val groupAvatarMap: StateFlow<Map<Long, String?>> = _groupAvatarMap.asStateFlow()
+
+    val currentActiveConvId = mutableStateOf<Long?>(null)
+
+    fun setActiveConversation(convId: Long?) {
+        currentActiveConvId.value = convId
+    }
+
+
+    fun markConversationAsUnread(convId: Long) {
+        _unreadConversations.value = _unreadConversations.value + convId
+    }
+
+    fun markConversationAsRead(convId: Long) {
+        _unreadConversations.value = _unreadConversations.value - convId
+    }
 
     fun deleteConversation(convId: Long) {
         viewModelScope.launch {

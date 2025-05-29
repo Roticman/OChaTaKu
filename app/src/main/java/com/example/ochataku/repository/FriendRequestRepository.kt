@@ -1,11 +1,9 @@
 package com.example.ochataku.repository
 
-import android.util.Log
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.service.ApiService
-import com.example.ochataku.service.FriendRequest
-import com.example.ochataku.service.FriendRequestDisplay
-import com.example.ochataku.service.HandleFriendRequest
+import com.example.ochataku.model.FriendRequestDisplay
+import com.example.ochataku.model.HandleFriendRequest
 import javax.inject.Inject
 
 class FriendRequestRepository @Inject constructor(

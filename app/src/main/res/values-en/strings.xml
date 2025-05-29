@@ -7,6 +7,13 @@
     <string name="update_success">Update Success</string>
     <string name="basic_info">Basic Info</string>
     <string name="personal_info">Personal Info</string>
+    <string name="image_preview_2">[Image]</string>
+    <string name="video_preview">[Video]</string>
+    <string name="voice_preview">[Voice]</string>
+    <string name="replying_to">Replying：</string>
+    <string name="AI">Please tell AI what you want</string>
+    <string name="AI_title">AI API</string>
+
 
     <string name="login_success">Login Successful</string>
     <string name="welcome_login">Welcome Back</string>

@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,8 +44,12 @@ import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.ochataku.R
+import com.example.ochataku.manager.sendSystemNotification
+import com.example.ochataku.model.ChatAgentState
 import com.example.ochataku.service.ApiClient.connectAndListen
+import com.example.ochataku.service.DeepSeekClient
 import com.example.ochataku.viewmodel.ChatViewModel
+import com.example.ochataku.viewmodel.ConversationViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -64,6 +69,7 @@ fun ChatScreen(
     currentUserAvatarUrl: String?,
 ) {
     val viewModel: ChatViewModel = hiltViewModel()
+    val conversationViewModel: ConversationViewModel = hiltViewModel()
     val context = LocalContext.current
     val messages by viewModel.messages.collectAsState()
     var messageText by remember { mutableStateOf(TextFieldValue()) }
@@ -176,20 +182,76 @@ fun ChatScreen(
 // ✅ 加载消息 + 接收消息流
     LaunchedEffect(convId) {
         viewModel.loadMessagesByConvId(context, convId)
+        conversationViewModel.markConversationAsRead(convId) // 👈 加这一行
         connectAndListen(convId) { messageJson ->
             val message = parseMessage(messageJson)
+            if (message.sender_id != currentUserId) {
+                if (conversationViewModel.currentActiveConvId.value != convId) {
+                    conversationViewModel.markConversationAsUnread(convId)
+                    sendSystemNotification(
+                        context,
+                        title = peerName,
+                        content = message.content,
+                        convId = convId,
+                        peerId = peerId,
+                        peerName = peerName,
+                        isGroup = isGroup,
+                        peerAvatarUrl = peerAvatarUrl!!
+                    )
+                }
+                conversationViewModel.markConversationAsUnread(convId)
+            }
             coroutineScope.launch {
                 viewModel.addMessage(message)
                 delay(100)
                 listState.animateScrollToItem(messages.lastIndex)
+
+                // ✅ AI 自动回复逻辑
+                if (ChatAgentState.isEnabled(
+                        currentUserId,
+                        convId
+                    ) && message.sender_id != currentUserId
+                ) {
+                    val prompt = buildString {
+                        val userPrompt = ChatAgentState.getPrompt(currentUserId, convId)
+                        if (userPrompt.isNotBlank()) {
+                            append(userPrompt)
+                            append("\n\n")
+                        }
+                        append("用户说：${message.content}")
+                    }
+
+
+                    DeepSeekClient.fetchResponseFor(prompt) { aiReply ->
+                        if (!aiReply.isNullOrBlank()) {
+                            viewModel.sendMessage(
+                                context = context,
+                                mediaUri = null,
+                                messageType = "text",
+                                content = aiReply,
+                                senderId = currentUserId,
+                                receiverId = peerId,
+                                convId = convId,
+                                isGroup = isGroup
+                            )
+                        }
+                    }
+                }
             }
         }
+
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            conversationViewModel.setActiveConversation(null)
+        }
+    }
 
     Scaffold(
         topBar = {
             ChatTopBar(
+                currentUserId = currentUserId,
                 peerId = peerId,
                 peerName = peerName,
                 isGroup = isGroup,

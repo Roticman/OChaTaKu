@@ -4,9 +4,9 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.example.ochataku.repository.UserRepository
-import com.example.ochataku.service.RegisterRequest
-import com.example.ochataku.service.RegisterResponse
-import com.example.ochataku.service.UploadResponse
+import com.example.ochataku.model.RegisterRequest
+import com.example.ochataku.model.RegisterResponse
+import com.example.ochataku.model.UploadResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +38,7 @@ class RegisterViewModel @Inject constructor(
         if (avatarUri != null) {
             val file = uriToFile(context, avatarUri)
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val avatarPart = MultipartBody.Part.createFormData("file", file.name, requestFile)
+            val avatarPart = MultipartBody.Part.createFormData("avatar", file.name, requestFile)
 
             userRepository.uploadAvatar(avatarPart)
                 .enqueue(object : Callback<UploadResponse> {

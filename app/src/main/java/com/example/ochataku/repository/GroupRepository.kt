@@ -1,11 +1,9 @@
 package com.example.ochataku.repository
 
-import android.util.Log
 import com.example.ochataku.data.local.group.GroupDao
 import com.example.ochataku.data.local.group.GroupEntity
-import com.example.ochataku.service.ApiClient
 import com.example.ochataku.service.ApiService
-import com.example.ochataku.service.UploadResponse
+import com.example.ochataku.model.UploadResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import com.example.ochataku.data.local.user.UserEntity
 import com.example.ochataku.service.ApiClient
-import com.example.ochataku.service.ChangePasswordRequest
+import com.example.ochataku.model.ChangePasswordRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

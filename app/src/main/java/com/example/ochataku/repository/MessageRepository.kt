@@ -4,9 +4,9 @@ package com.example.ochataku.repository
 import com.example.ochataku.data.local.message.MessageDao
 import com.example.ochataku.data.local.message.MessageEntity
 import com.example.ochataku.service.ApiService
-import com.example.ochataku.service.MessageResponse
-import com.example.ochataku.service.SendMessageRequest
-import com.example.ochataku.service.UploadResponse
+import com.example.ochataku.model.MessageResponse
+import com.example.ochataku.model.SendMessageRequest
+import com.example.ochataku.model.UploadResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call

@@ -7,7 +7,7 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.media.MediaRecorder
 import android.os.Environment
-import com.example.ochataku.service.MessageDisplay
+import com.example.ochataku.model.MessageDisplay
 import org.json.JSONObject
 import java.io.File
 import java.net.URL

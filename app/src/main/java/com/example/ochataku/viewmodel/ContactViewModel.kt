@@ -1,6 +1,5 @@
 package com.example.ochataku.viewmodel
 
-import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -9,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ochataku.data.local.contact.ContactEntity
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.repository.ContactRepository
-import com.example.ochataku.service.ContactSimple
+import com.example.ochataku.model.ContactSimple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

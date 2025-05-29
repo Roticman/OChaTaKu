@@ -57,7 +57,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.ochataku.R
 import com.example.ochataku.service.ApiClient.BASE_URL
-import com.example.ochataku.service.UserSearchResult
+import com.example.ochataku.model.UserSearchResult
 import com.example.ochataku.viewmodel.AddFriendViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

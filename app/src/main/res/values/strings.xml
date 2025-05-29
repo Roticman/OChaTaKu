@@ -9,6 +9,11 @@
     <string name="update_success">更新成功</string>
     <string name="basic_info">基本信息</string>
     <string name="personal_info">个人信息</string>
+    <string name="image_preview_2">[图片]</string>
+    <string name="video_preview">[视频]</string>
+    <string name="voice_preview">[语音消息]</string>
+    <string name="replying_to">正在回复：</string>
+
 
     <string name="storage_permission_granted">存储权限已授权</string>
     <string name="storage_permission_denied">存储权限被拒绝，相关功能将无法使用</string>
@@ -282,6 +287,9 @@
 
     <string name="close">关闭</string>
     <string name="confirm">确认</string>
+    <string name="AI">请告诉AI你的需求</string>
+    <string name="AI_title">AI代理</string>
+
 
     <!-- Audio -->
     <string name="audio_volume_increase_error">音量增大失败</string>

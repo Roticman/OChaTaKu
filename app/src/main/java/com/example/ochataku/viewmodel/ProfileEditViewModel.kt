@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ochataku.R
 import com.example.ochataku.service.ApiService
-import com.example.ochataku.service.UpdateProfileRequest
+import com.example.ochataku.model.UpdateProfileRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

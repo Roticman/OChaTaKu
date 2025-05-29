@@ -1,5 +1,8 @@
-package com.example.ochataku.service
+package com.example.ochataku.model
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.example.ochataku.data.local.user.UserEntity
 import com.google.gson.annotations.SerializedName
 
@@ -154,6 +157,38 @@ data class MessageResponse(
     val media_url: String? = null
 )
 
+data class QuotedMessage(
+    val id: Long,
+    val type: String,
+    val preview: String,     // 文本或描述
+    val mediaUrl: String? = null
+)
+
+object ChatAgentState {
+    private val agentStates = mutableMapOf<Pair<Long, Long>, Pair<Boolean, String>>()
+    // (userId, convId) -> (enableAI, prompt)
+
+    fun isEnabled(userId: Long, convId: Long): Boolean =
+        agentStates[userId to convId]?.first ?: false
+
+    fun getPrompt(userId: Long, convId: Long): String =
+        agentStates[userId to convId]?.second ?: ""
+
+    fun setAgent(userId: Long, convId: Long, enabled: Boolean, prompt: String) {
+        agentStates[userId to convId] = enabled to prompt
+    }
+
+    fun clear(userId: Long, convId: Long) {
+        agentStates.remove(userId to convId)
+    }
+}
+
+
+data class DeepSeekRequest(
+    val model: String = "deepseek-chat",
+    val messages: List<Message>
+)
+
 // ---------------------- 群组管理 ----------------------
 data class GroupMember(
     val userId: Long,
@@ -187,5 +222,14 @@ data class MessageDisplay(
     val timestamp: Long,
     val is_group: Int,
     val message_type: String = "text",
-    val media_url: String? = null
+    val media_url: String? = null,
+    // ✅ 新增：本地附加的引用内容（可空）
+    val quotePreview: QuotedMessage? = null
 )
+
+// ---------------------- API模型 ----------------------
+data class Message(val role: String, val content: String)
+data class ChatRequest(val model: String, val messages: List<Message>)
+data class ChatResponse(val choices: List<Choice>)
+data class Choice(val message: Message)
+

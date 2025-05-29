@@ -26,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -108,9 +110,31 @@ class MainActivity : ComponentActivity() {
             val primaryColor by themeViewModel.primaryColor.collectAsState()
 
             ChatAppTheme(primaryColor = primaryColor) {
-                val navController = rememberNavController()
                 val mainViewModel: MainViewModel = hiltViewModel()
                 val uiState by mainViewModel.uiState.collectAsState()
+                val navController = rememberNavController()
+
+                // 使用 rememberSaveable 来确保第一次执行跳转
+                val jumpedToChat = rememberSaveable { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    if (!jumpedToChat.value) {
+                        val convId = intent.getLongExtra("open_conv_id", -1L)
+                        val peerId = intent.getLongExtra("open_peer_id", -1L)
+                        val peerName = intent.getStringExtra("open_peer_name") ?: ""
+                        val isGroup = intent.getBooleanExtra("open_is_group", false)
+                        val peerAvatar = intent.getStringExtra("open_peer_avatar") ?: ""
+
+                        if (convId > 0 && peerId > 0 && peerName.isNotBlank()) {
+                            val encodedName = Uri.encode(peerName)
+                            val encodedAvatar = Uri.encode(peerAvatar)
+                            navController.navigate("chat/$convId/$peerId/$encodedName/$isGroup/$encodedAvatar")
+                            jumpedToChat.value = true
+                        }
+                    }
+                }
+
+
 
                 // 登录状态导航控制
                 LaunchedEffect(uiState) {
@@ -138,7 +162,6 @@ class MainActivity : ComponentActivity() {
                 val currentRoute = navBackStackEntry?.destination?.route
                 val showBottomBar = currentRoute in bottomRoutes
                 val currentUserId = authManager.getUserId()
-
 
                 Scaffold(
                     bottomBar = {
@@ -175,8 +198,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("conversation") {
-                            // 1. 先拿到当前用户 ID
-                            val currentUserId = authManager.getUserId()
 
                             // 2. 渲染会话列表，并传入 onConversationClick 回调
                             ConversationScreen(
@@ -352,3 +373,4 @@ private fun BottomNavigationBar(navController: NavHostController) {
 
     }
 }
+

@@ -3,7 +3,7 @@ package com.example.ochataku.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ochataku.repository.ContactProfileRepository
-import com.example.ochataku.service.ProfileUiState
+import com.example.ochataku.model.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -2,6 +2,7 @@ package com.example.ochataku.ui
 
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,12 +29,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,6 +62,8 @@ fun ConversationScreen(
     // 收集所有群成员头像列表的 Map<ConvId, List<AvatarUrl>>
     val groupMembersMap by viewModel.groupMembersMap.collectAsState()
     val groupAvatarMap by viewModel.groupAvatarMap.collectAsState()
+    val unreadConvs by viewModel.unreadConversations
+
 
 
     LaunchedEffect(userId) {
@@ -141,6 +146,14 @@ fun ConversationScreen(
                                     .size(48.dp)
                                     .clip(RoundedCornerShape(8.dp))
                             )
+                            if (unreadConvs.contains(convo.convId)) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(Color.Red, RoundedCornerShape(4.dp))
+                                )
+                            }
+
                         },
                         headlineContent = {
                             val name =
@@ -148,15 +161,34 @@ fun ConversationScreen(
                             Text(name, fontSize = 16.sp)
                         },
                         supportingContent = {
-                            Text(convo.lastMessage, fontSize = 14.sp, color = Color.Gray)
+                            Text(
+                                text = convo.lastMessage,
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis // 👈 添加这两行
+                            )
                         },
                         trailingContent = {
-                            Text(
-                                text = formatSmartTime(context = context, convo.timestamp),
-                                fontSize = 12.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                            Box {
+                                Text(
+                                    text = formatSmartTime(context, convo.timestamp),
+                                    fontSize = 12.sp,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+
+                                if (unreadConvs.contains(convo.convId)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .clip(RoundedCornerShape(5.dp))
+                                            .background(Color.Red)
+                                            .align(Alignment.TopEnd)
+                                    )
+                                }
+                            }
+
                         },
                         modifier = Modifier
                             .fillMaxWidth()

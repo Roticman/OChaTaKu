@@ -1,7 +1,7 @@
 package com.example.ochataku.repository
 
 import com.example.ochataku.service.ApiClient
-import com.example.ochataku.service.ProfileUiState
+import com.example.ochataku.model.ProfileUiState
 import javax.inject.Inject
 
 class ContactProfileRepository @Inject constructor(){

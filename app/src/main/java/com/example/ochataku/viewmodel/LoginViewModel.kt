@@ -1,14 +1,13 @@
 package com.example.ochataku.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ochataku.data.local.user.UserEntity
 import com.example.ochataku.manager.AuthManager
 import com.example.ochataku.repository.UserRepository
-import com.example.ochataku.service.LoginRequest
-import com.example.ochataku.service.LoginResponse
+import com.example.ochataku.model.LoginRequest
+import com.example.ochataku.model.LoginResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

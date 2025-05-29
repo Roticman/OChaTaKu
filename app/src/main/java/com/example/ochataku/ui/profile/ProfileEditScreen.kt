@@ -55,7 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.ochataku.R
 import com.example.ochataku.manager.AuthManager
-import com.example.ochataku.service.UpdateProfileRequest
+import com.example.ochataku.model.UpdateProfileRequest
 import com.example.ochataku.viewmodel.ProfileEditViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
