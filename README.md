@@ -53,7 +53,7 @@
 - `mediaresource`：上传的媒体文件
 - `usersetting`：用户偏好设置
 
-完整建表脚本参见项目中的 [`Android.sql`](./Android.sql)。
+完整建表脚本参见项目中的 [`Android.sql`](./app/src/main/java/com/example/ochataku/MySQL/Android.sql)。
 
 ---
 
