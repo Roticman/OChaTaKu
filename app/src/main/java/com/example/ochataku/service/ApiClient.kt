@@ -13,7 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    const val BASE_URL = "http://192.168.1.3:3000"
+    const val BASE_URL = "http://172.20.10.6:3000" //替换成当前本地服务器的IPV4地址，或者云服务器地址。
     val apiService: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
