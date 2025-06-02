@@ -1,102 +1,67 @@
 
 # 📱 OChaTaKu 聊天系统
 
-OChaTaKu 是一个基于 Kotlin Android、Node.js 和 MySQL 构建的即时通讯应用，支持私聊、群聊、头像昵称展示、消息发送与媒体上传等功能。
+一个支持私聊、群聊、音视频、语音消息、AI 助手、语言切换与主题自定义的完整即时通讯系统，包含 Android 前端、Node.js 后端及 MySQL 数据库，适合学习、实践与展示。
 
 ---
 
-## 🚀 功能特性
+## 📌 项目特点
 
-- **双端通信**：支持私聊和群聊，自动识别并展示用户或群组信息。
-- **消息模块**：支持文本和图片消息，群聊中展示群内昵称，自动刷新会话列表。
-- **用户模块**：注册、登录、用户信息展示，提供简洁的用户信息接口。
-- **群组模块**：群组基本信息展示，包括群公告、成员数、群头像等字段。
-
----
-
-## 🛠 技术栈
-
-- **前端（移动端）**：Kotlin、Jetpack Compose、Room、Hilt
-- **后端**：Node.js、Express
-- **数据库**：MySQL 8.x
-- **图片加载**：Coil
-- **网络通信**：Retrofit、OkHttp
-- **构建工具**：Gradle、KSP（Kotlin Symbol Processing）
+- 支持 **私聊 / 群聊**，消息类型包括文字、图片、语音、视频
+- 引入 **AI 会话助手**（支持开启 / 关闭）
+- 支持 **语音长按录音**、全屏图片 / 视频预览、消息引用 / 删除
+- 实现 **好友添加、请求管理、联系人备注与头像** 功能
+- 支持 **用户注册、登录、修改资料、注销账号**
+- 支持 **中英文语言切换、深浅主题切换**
+- 前端使用 Jetpack Compose + MVVM，后端基于 Express + MySQL
+- 本地缓存：Room 数据库 + DataStore，支持离线访问与偏好持久化
+- 多媒体上传与访问支持（语音、视频、图片、头像）
 
 ---
 
-## 📂 项目结构
+## 📱 前端技术栈（Android）
 
-```
-OChaTaKu/
-├── app/                       # Android 应用
-│   ├── data/local             # Room 实体与 Dao
-│   ├── service/               # Retrofit 接口
-│   ├── ui/                    # Jetpack Compose 界面
-│   └── viewmodel/             # ViewModel 层
-├── chat-backend/              # Node.js 后端
-│   ├── routes/                # 路由模块（user.js, group.js, message.js...）
-│   ├── app.js                 # 入口文件
-│   └── db.js                  # 数据库连接配置
-└── database/
-    └── schema.sql             # MySQL 数据库结构
-```
+- Jetpack Compose + Kotlin + MVVM
+- Retrofit + Hilt + Coil + Room + DataStore
+- Socket.IO 实现聊天室房间连接
+- 状态管理使用 StateFlow / MutableState
+- 多语言、多主题支持（含 DataStore 持久化）
 
 ---
 
-## 📦 数据表结构简要
+## 🌐 后端技术栈（Node.js）
 
-### `conversation` 表
-
-| 字段         | 类型    | 说明               |
-|--------------|---------|--------------------|
-| conv_id      | BIGINT  | 主键，自增         |
-| user_id      | BIGINT  | 当前用户 ID        |
-| peer_id      | BIGINT  | 对方 ID（用户/群） |
-| is_group     | BOOLEAN | 是否为群聊         |
-| last_message | TEXT    | 最后一条消息       |
-| timestamp    | BIGINT  | 时间戳             |
-
-### `message` 表
-
-| 字段         | 类型    | 说明               |
-|--------------|---------|--------------------|
-| id           | BIGINT  | 主键，自增         |
-| sender_id    | BIGINT  | 发送者 ID          |
-| conv_id      | BIGINT  | 所属会话 ID        |
-| content      | TEXT    | 消息内容           |
-| media_url    | TEXT    | 媒体文件 URL       |
-| message_type | VARCHAR | 消息类型（text/image） |
-| timestamp    | BIGINT  | 时间戳             |
+- Node.js + Express 框架
+- MySQL 数据库
+- Socket.IO 实时通信
+- Multer 实现头像与媒体上传
+- 模块结构清晰：用户、联系人、消息、群组、会话等
 
 ---
 
-## ⚙️ 快速开始
+## 🗃 数据库结构（MySQL）
 
-### Android 项目
+数据库设计包括以下主要表：
 
-1. 使用 Android Studio 打开 `OChaTaKu` 项目。
-2. 配置本地 IP 和后端接口地址。
-3. 运行 App。
+- `user`：用户信息
+- `contact`：联系人关系
+- `friendrequest`：好友请求记录
+- `conversation`：会话信息
+- `message`：聊天消息记录
+- `group`：群组信息
+- `groupmember`：群成员关系
+- `mediaresource`：上传的媒体文件
+- `usersetting`：用户偏好设置
 
-### 后端 Node.js
+完整建表脚本参见项目中的 [`Android.sql`](./app/src/main/java/com/example/ochataku/MySQL/Android.sql)。
+
+---
+
+## 🚀 快速启动指南
+
+### ✅ 后端启动
 
 ```bash
-cd chat-backend
+cd server
 npm install
-node app.js
-```
-
-确保 `.env` 或 `db.js` 中的数据库配置正确。
-
----
-
-## 📸 截图示例
-
-> *建议在此处插入聊天界面、会话界面、发送消息界面等截图，展示产品功能亮点。*
-
----
-
-## 📄 License
-
-MIT License © 2025 [Roticman](https://github.com/Roticman)
+node server.js
