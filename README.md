@@ -72,6 +72,7 @@
 cd server
 npm install
 node server.js
+```
 
 ### ✅ 前端启动
 
