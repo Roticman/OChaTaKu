@@ -63,9 +63,6 @@
 
 使用MySQLWorkBench导入[`Android.sql`](./app/src/main/java/com/example/ochataku/MySQL/Android.sql)。
 
-### ✅ 前端启动
-
-将该项目拉取到本地使用AndroidStudio打开项目文件，点击运行即可。
 
 ### ✅ 后端启动
 
@@ -75,3 +72,7 @@
 cd server
 npm install
 node server.js
+
+### ✅ 前端启动
+
+将该项目拉取到本地使用AndroidStudio打开项目文件，点击运行即可。
