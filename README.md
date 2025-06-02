@@ -74,6 +74,47 @@ npm install
 node server.js
 ```
 
-### ✅ 前端启动
+默认运行于：
 
-将该项目拉取到本地使用AndroidStudio打开项目文件，点击运行即可。
+```
+http://localhost:3000
+```
+
+### ✅ 数据库初始化
+
+```bash
+mysql -u root -p < Android.sql
+```
+
+请确保本地 MySQL 中已创建 `android` 数据库，并根据情况修改 `db.js` 配置。
+
+### ✅ Android 前端运行
+
+1. 使用 Android Studio 打开项目
+2. 运行 `MainActivity.kt`
+3. 修改 `ApiClient.kt` 中的 `BASE_URL` 为实际后端地址
+
+---
+
+## ✨ 项目亮点
+
+* Jetpack Compose 构建响应式 UI，UI 逻辑清晰
+* 使用 Room + Retrofit + Hilt 完善架构体系
+* AI 助手集成，提升交互智能性
+* 本地数据库与远程服务同步逻辑健全
+* 支持文件上传、消息缓存、断网可用
+
+---
+
+## 🧑‍💻 作者
+
+由 **\[Roticman]** 独立完成，作为本科毕业设计项目。欢迎参考、学习和提出建议！
+
+---
+
+## 📄 License
+
+本项目仅供学习交流，版权归作者所有，禁止商用。
+
+```
+
